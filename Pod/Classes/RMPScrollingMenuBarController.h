@@ -70,13 +70,15 @@ typedef NS_ENUM(NSInteger, RMPMenuBarControllerDirection) {
  */
 @interface RMPScrollingMenuBarController : UIViewController
 
+@property (nonatomic, assign) CGFloat barHeight;
+
 /** ScrollingMenuBar object.
  */
-@property (nonatomic, readonly) RMPScrollingMenuBar *menuBar;
+@property (nonatomic, strong, readonly) RMPScrollingMenuBar *menuBar;
 
 /** Container view for presenting view of child view controller.
  */
-@property (nonatomic, readonly) UIView *containerView;
+@property (nonatomic, strong, readonly) UIView *containerView;
 
 /** NSArray of child view controllers.
  */

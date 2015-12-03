@@ -78,18 +78,6 @@
     return self;
 }
 
-- (CGSize)sizeThatFits:(CGSize)size {
-    CGFloat w, h;
-    if (self.superview) {
-        w = self.superview.bounds.size.width;
-    } else {
-        w = [[UIScreen mainScreen] bounds].size.width;
-    }
-    h = _barHeight;
-
-    return CGSizeMake(w, h);
-}
-
 - (void)layoutSubviews {
     _scrollView.frame = self.bounds;
     _scrollView.contentInset = UIEdgeInsetsZero;

@@ -21,7 +21,12 @@
 #import "RMPScrollingMenuBarController.h"
 #import "RMPScrollingMenuBarControllerTransition.h"
 
+const CGFloat RMPMenuBarDefaultBarHeight = 64.f;
+
 @interface RMPScrollingMenuBarController () <RMPScrollingMenuBarDelegate>
+
+@property (nonatomic, strong) NSArray *usedConstraints;
+@property (nonatomic, strong) NSLayoutConstraint *barHeightConstraint;
 
 @end
 
@@ -31,40 +36,36 @@
     RMPScrollingMenuBarDirection _menuBarDirection;
 }
 
+- (nullable instancetype)initWithCoder:(NSCoder *)aDecoder {
+    self = [super initWithCoder:aDecoder];
+    if (self) {
+        _barHeight = RMPMenuBarDefaultBarHeight;
+    }
 
-- (void)loadView {
-    [super loadView];
+    return self;
+}
 
-    self.automaticallyAdjustsScrollViewInsets = NO;
-    self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    [self.view setTranslatesAutoresizingMaskIntoConstraints:YES];
+- (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        _barHeight = RMPMenuBarDefaultBarHeight;
+    }
 
-    CGRect rect;
-    // Menu bar
-    rect = CGRectMake(0, 0, self.view.bounds.size.width, kRMPMenuBarDefaultBarHeight);
-    RMPScrollingMenuBar *menuBar = [[RMPScrollingMenuBar alloc] initWithFrame:rect];
-    _menuBar = menuBar;
-    CGFloat offset = 32.0f / 320.0f * [[UIScreen mainScreen] bounds].size.width;
-    _menuBar.itemInsets = UIEdgeInsetsMake(2, offset, 0, offset);
-    [self.view addSubview:menuBar];
-    [_menuBar sizeToFit];
-    rect = _menuBar.frame;
-    rect.origin.y = [self.topLayoutGuide length];
-    _menuBar.frame = rect;
-    _menuBar.delegate = self;
-    _menuBar.backgroundColor = self.view.backgroundColor;
+    return self;
+}
 
-    // Container
-    CGFloat y = CGRectGetMaxY(_menuBar.frame);
-    rect = CGRectMake(0, y,
-        self.view.bounds.size.width,
-        self.view.bounds.size.height - y);
-    UIView *containerView = [[UIView alloc] initWithFrame:rect];
-    _containerView = containerView;
-    _containerView.backgroundColor = [UIColor colorWithWhite:0.8 alpha:1.0];
-    [self.view addSubview:_containerView];
+- (void)viewDidLoad {
+    [super viewDidLoad];
 
+    _menuBar = [[RMPScrollingMenuBar alloc] initWithFrame:self.view.bounds];
+    self.menuBar.delegate = self;
+    [self.view addSubview:self.menuBar];
+
+    _containerView = [[UIView alloc] initWithFrame:self.view.bounds];
     [self.view insertSubview:self.containerView belowSubview:self.menuBar];
+
+    [self instantiateConstraints];
+    [self updateViewConstraints];
 
     _transition = [[RMPScrollingMenuBarControllerTransition alloc] initWithMenuBarController:self];
     self.transitionDelegate = _transition;
@@ -75,33 +76,47 @@
     }
 }
 
-- (void)viewDidLoad {
-    [super viewDidLoad];
-    // Do any additional setup after loading the view.
+#pragma mark - Layout
+
+- (void)instantiateConstraints {
+    NSDictionary *views = @{@"view": _menuBar, @"container": self.containerView};
+    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[view]|"
+                                                                      options:NSLayoutFormatDirectionLeadingToTrailing
+                                                                      metrics:nil
+                                                                        views:views]];
+
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.view
+                                                          attribute:NSLayoutAttributeTop
+                                                          relatedBy:NSLayoutRelationEqual
+                                                             toItem:self.menuBar
+                                                          attribute:NSLayoutAttributeTop
+                                                         multiplier:1.f
+                                                           constant:0.f]];
+
+    self.barHeightConstraint = [NSLayoutConstraint constraintWithItem:self.menuBar
+                                                            attribute:NSLayoutAttributeHeight
+                                                            relatedBy:NSLayoutRelationEqual
+                                                               toItem:nil
+                                                            attribute:NSLayoutAttributeNotAnAttribute
+                                                           multiplier:1.f
+                                                             constant:self.barHeight];
+
+    [self.menuBar addConstraint:self.barHeightConstraint];
+
+    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[container]|"
+                                                                      options:NSLayoutFormatDirectionLeadingToTrailing
+                                                                      metrics:nil
+                                                                        views:views]];
+    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[view][container]|"
+                                                                      options:NSLayoutFormatDirectionLeadingToTrailing
+                                                                      metrics:nil
+                                                                        views:views]];
 }
 
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
+- (void)updateViewConstraints {
+    [super updateViewConstraints];
 
-- (void)viewWillLayoutSubviews {
-    [super viewWillLayoutSubviews];
-
-    CGRect rect;
-    rect = CGRectMake(0, [self.topLayoutGuide length], self.view.bounds.size.width, _menuBar.barHeight);
-    _menuBar.frame = rect;
-
-    rect = CGRectMake(0, CGRectGetMaxY(_menuBar.frame),
-        self.view.bounds.size.width,
-        self.view.bounds.size.height - CGRectGetMaxY(_menuBar.frame));
-    _containerView.frame = rect;
-
-
-}
-
-- (void)viewDidAppear:(BOOL)animated {
-    [super viewDidAppear:animated];
+    self.barHeightConstraint.constant = self.barHeight;
 }
 
 #pragma mark -
@@ -113,7 +128,7 @@
 - (void)setViewControllers:(NSArray *)viewControllers animated:(BOOL)animated {
     _viewControllers = [viewControllers copy];
 
-    if (_menuBar) {
+    if ([self isViewLoaded]) {
         [self updateMenuBarWithViewControllers:_viewControllers animated:animated];
     }
 
@@ -123,23 +138,24 @@
 }
 
 - (void)updateMenuBarWithViewControllers:(NSArray *)viewControllers animated:(BOOL)animated {
-    // Update menu bar items.
-    NSMutableArray *items = [NSMutableArray array];
-    RMPScrollingMenuBarItem *item = nil;
-    int i = 0;
+    NSMutableArray *items = [NSMutableArray new];
+    NSInteger index = 0;
+
     for (UIViewController *vc in viewControllers) {
+        RMPScrollingMenuBarItem *item = nil;
         if ([_delegate respondsToSelector:@selector(menuBarController:menuBarItemAtIndex:)]) {
-            item = [_delegate menuBarController:self menuBarItemAtIndex:i];
+            item = [_delegate menuBarController:self menuBarItemAtIndex:index];
         } else {
             item = [RMPScrollingMenuBarItem item];
             item.title = vc.title;
-            item.tag = i;
+            item.tag = index;
         }
         [items addObject:item];
-        i++;
-    }
-    _items = [NSArray arrayWithArray:items];
 
+        index++;
+    }
+
+    _items = [items copy];
     [_menuBar setItems:_items animated:animated];
 }
 
