@@ -25,7 +25,7 @@
 
 typedef NS_ENUM(NSUInteger, RMPScrollingMenuBarStyle) {
     RMPScrollingMenuBarStyleNormal,
-    RMPScrollingMenuBarStyleInfinitePaging,
+    RMPScrollingMenuBarStyleStatic,
 };
 
 typedef NS_ENUM(NSInteger, RMPScrollingMenuBarDirection) {
@@ -47,10 +47,6 @@ typedef NS_ENUM(NSInteger, RMPScrollingMenuBarDirection) {
 /** View Class of ScrollingMenuBar
  */
 @interface RMPScrollingMenuBar : UIView
-
-/** Height of menu bar
- */
-@property (nonatomic, assign) CGFloat barHeight;
 
 /** Insets of menu items on menu bar. Use for adjusting spaces between menu items.
  */

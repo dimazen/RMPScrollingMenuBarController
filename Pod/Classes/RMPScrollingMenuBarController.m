@@ -58,10 +58,14 @@ const CGFloat RMPMenuBarDefaultBarHeight = 64.f;
     [super viewDidLoad];
 
     _menuBar = [[RMPScrollingMenuBar alloc] initWithFrame:self.view.bounds];
+    self.menuBar.translatesAutoresizingMaskIntoConstraints = NO;
+    self.menuBar.backgroundColor = [UIColor redColor];
     self.menuBar.delegate = self;
     [self.view addSubview:self.menuBar];
 
     _containerView = [[UIView alloc] initWithFrame:self.view.bounds];
+    self.containerView.translatesAutoresizingMaskIntoConstraints = NO;
+    self.containerView.backgroundColor = [UIColor yellowColor];
     [self.view insertSubview:self.containerView belowSubview:self.menuBar];
 
     [self instantiateConstraints];
@@ -117,6 +121,12 @@ const CGFloat RMPMenuBarDefaultBarHeight = 64.f;
     [super updateViewConstraints];
 
     self.barHeightConstraint.constant = self.barHeight;
+}
+
+- (void)setBarHeight:(CGFloat)barHeight {
+    _barHeight = barHeight;
+
+    [self updateViewConstraints];
 }
 
 #pragma mark -
