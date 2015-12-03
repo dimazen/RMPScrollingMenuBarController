@@ -21,8 +21,8 @@
 		923619241A5A3C3F00A3754E /* RMPAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 923619211A5A3C3F00A3754E /* RMPAppDelegate.m */; };
 		923619251A5A3C3F00A3754E /* RMPViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 923619231A5A3C3F00A3754E /* RMPViewController.m */; };
 		923619281A5A7E9100A3754E /* RMPPageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 923619271A5A7E9100A3754E /* RMPPageViewController.m */; };
-		B3F3BD4A521683177F4A6A54 /* Pods_RMPScrollingMenuBarController.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3D95260CC24310220D239D6 /* Pods_RMPScrollingMenuBarController.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
-		BA82FA671DAD5D210640A226 /* Pods_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C063F9BDDBBC03193D8191E5 /* Pods_Tests.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
+		B3F3BD4A521683177F4A6A54 /* Pods_RMPScrollingMenuBarController.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3D95260CC24310220D239D6 /* Pods_RMPScrollingMenuBarController.framework */; };
+		BA82FA671DAD5D210640A226 /* Pods_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C063F9BDDBBC03193D8191E5 /* Pods_Tests.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
