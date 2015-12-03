@@ -81,7 +81,7 @@
 
     // Set ViewControllers for menu bar controller
     NSMutableArray* viewControllers = [NSMutableArray array];
-    for(int i = 0; i < 10; i++){
+    for(int i = 0; i < 3; i++){
         RMPPageViewController* vc = [[RMPPageViewController alloc] init];
         vc.view.backgroundColor = [UIColor colorWithWhite:0.3+0.05*i alpha:1.0];
         vc.message = [NSString stringWithFormat:@"Message for No.%ld", (long)i+1];

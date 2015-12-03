@@ -21,12 +21,16 @@
 #import <UIKit/UIKit.h>
 #import "RMPScrollingMenuBarController.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 /** ScrollingMenuBarController's Helper Category
  */
 @interface UIViewController (RMPScrollingMenuBarControllerHelper)
 
 /** Return the parent menu bar controller.
  */
-- (RMPScrollingMenuBarController*)menuBarController;
+- (nullable RMPScrollingMenuBarController *)menuBarController;
 
 @end
+
+NS_ASSUME_NONNULL_END

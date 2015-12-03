@@ -28,7 +28,7 @@ typedef NS_ENUM(NSUInteger, RMPScrollingMenuBarStyle) {
     RMPScrollingMenuBarStyleInfinitePaging,
 };
 
-typedef NS_ENUM(NSInteger, RMPScrollingMenuBarDirection){
+typedef NS_ENUM(NSInteger, RMPScrollingMenuBarDirection) {
     RMPScrollingMenuBarDirectionNone,
     RMPScrollingMenuBarDirectionLeft,
     RMPScrollingMenuBarDirectionRight,
@@ -40,7 +40,7 @@ typedef NS_ENUM(NSInteger, RMPScrollingMenuBarDirection){
  */
 @protocol RMPScrollingMenuBarDelegate <NSObject>
 
-- (void)menuBar:(RMPScrollingMenuBar*)menuBar didSelectItem:(RMPScrollingMenuBarItem*)item direction:(RMPScrollingMenuBarDirection)direction;
+- (void)menuBar:(RMPScrollingMenuBar *)menuBar didSelectItem:(RMPScrollingMenuBarItem *)item direction:(RMPScrollingMenuBarDirection)direction;
 
 @end
 
@@ -50,43 +50,43 @@ typedef NS_ENUM(NSInteger, RMPScrollingMenuBarDirection){
 
 /** Height of menu bar
  */
-@property (nonatomic, assign)CGFloat barHeight;
+@property (nonatomic, assign) CGFloat barHeight;
 
 /** Insets of menu items on menu bar. Use for adjusting spaces between menu items.
  */
-@property (nonatomic, assign)UIEdgeInsets itemInsets;
+@property (nonatomic, assign) UIEdgeInsets itemInsets;
 
 /** Delegate object
  */
-@property (nonatomic, weak)id<RMPScrollingMenuBarDelegate> delegate;
+@property (nonatomic, weak) id<RMPScrollingMenuBarDelegate> delegate;
 
 /** Array of menu items.
  */
-@property (nonatomic, copy)NSArray* items;
+@property (nonatomic, copy) NSArray *items;
 
 /** Selected menu item.
  */
-@property (nonatomic, weak)RMPScrollingMenuBarItem* selectedItem;
+@property (nonatomic, weak) RMPScrollingMenuBarItem *selectedItem;
 
 /** A Boolean value that controls whether the indicator is visible or not. 
     Default value is YES.
  */
-@property (nonatomic, assign)BOOL showsIndicator;
+@property (nonatomic, assign) BOOL showsIndicator;
 
 /** Color of indicator which be displayed under selected menu item.
  */
-@property (nonatomic, strong)UIColor* indicatorColor;
+@property (nonatomic, strong) UIColor *indicatorColor;
 
 /** A Boolean value that controls whether the separator line is visible or not.
  Default value is YES.
  */
-@property (nonatomic, assign)BOOL showsSeparatorLine;
+@property (nonatomic, assign) BOOL showsSeparatorLine;
 
 /* The menu bar style that specifies its behaviour.
  */
-@property (nonatomic, assign)RMPScrollingMenuBarStyle style;
+@property (nonatomic, assign) RMPScrollingMenuBarStyle style;
 
-@property (nonatomic, readonly)CGFloat scrollOffsetX;
+@property (nonatomic, readonly) CGFloat scrollOffsetX;
 
 /** Setter of menu items.
  */

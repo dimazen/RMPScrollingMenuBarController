@@ -93,15 +93,18 @@
 - (void)layoutSubviews {
     _scrollView.frame = self.bounds;
     _scrollView.contentInset = UIEdgeInsetsZero;
-    if (_style == RMPScrollingMenuBarStyleNormal) {
-        _scrollView.frame = CGRectMake(0, 0, _scrollView.frame.size.width, _scrollView.frame.size.height);
-    } else if (_style == RMPScrollingMenuBarStyleInfinitePaging) {
+
+    if (_style == RMPScrollingMenuBarStyleInfinitePaging) {
         _scrollView.frame = CGRectMake((_scrollView.frame.size.width - _infinitePagingBoundsWidth) * 0.5,
             0, _infinitePagingBoundsWidth, _scrollView.frame.size.height);
     }
 
     CGFloat lineWidth = 1.0f / [[UIScreen mainScreen] scale];
     _border.frame = CGRectMake(0, self.bounds.size.height - lineWidth, self.bounds.size.width, lineWidth);
+
+    CGRect indicatorFrame = _indicatorView.frame;
+    indicatorFrame.origin.y = self.bounds.size.height - 4;
+    _indicatorView.frame = indicatorFrame;
 }
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
@@ -197,10 +200,7 @@
             view.alpha = 0.0;
             [_scrollView addSubview:view];
 
-            [(RMPScrollingMenuBarButton *) view addTarget:self
-                                                   action:@selector(didTapMenuButton:)
-                                         forControlEvents:UIControlEventTouchUpInside];
-
+            [view addTarget:self action:@selector(didTapMenuButton:) forControlEvents:UIControlEventTouchUpInside];
         }
     }
     CGFloat contentWidth = offset - _itemInsets.left;
@@ -451,6 +451,8 @@
         newPosition.x = _infinitePagingOffsetX + _itemInsets.left;
     }
 
+    dispatch_group_t completionGroup = dispatch_group_create();
+
     if ((_indicatorView.frame.origin.x == 0.0 && _indicatorView.frame.size.width == 0.0)) {
         CGRect f = _indicatorView.frame;
         f.origin.x = newPosition.x - 3;
@@ -478,6 +480,8 @@
                 self.userInteractionEnabled = YES;
             }];
     } else if (_style == RMPScrollingMenuBarStyleInfinitePaging) {
+        dispatch_group_enter(completionGroup);
+
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) (0.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             [self reorderItemsForInfinitePaging];
 
@@ -487,18 +491,18 @@
             _indicatorView.frame = f;
 
             self.userInteractionEnabled = YES;
-            if ([_delegate respondsToSelector:@selector(menuBar:didSelectItem:direction:)]) {
-                [_delegate menuBar:self didSelectItem:_selectedItem direction:direction];
-            }
+
+            dispatch_group_leave(completionGroup);
+
             _infinitePagingIsTappedItem = NO;
         });
     }
 
-    // ************* extension *************
-    if ([_delegate respondsToSelector:@selector(menuBar:didSelectItem:direction:)]) {
-        [_delegate menuBar:self didSelectItem:_selectedItem direction:direction];
-    }
-    // *************************************
+    dispatch_group_notify(completionGroup, dispatch_get_main_queue(), ^{
+        if ([_delegate respondsToSelector:@selector(menuBar:didSelectItem:direction:)]) {
+            [_delegate menuBar:self didSelectItem:_selectedItem direction:direction];
+        }
+    });
 }
 
 - (void)setIndicatorColor:(UIColor *)indicatorColor {
@@ -512,12 +516,6 @@
     _barHeight = barHeight;
 
     [self sizeToFit];
-
-    // indicatorView repositioning.
-    CGRect frame = _indicatorView.frame;
-    frame.origin.y = self.bounds.size.height - 4;
-    _indicatorView.frame = frame;
-
     [self layoutIfNeeded];
 }
 

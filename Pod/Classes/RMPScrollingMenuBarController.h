@@ -21,9 +21,11 @@
 #import <UIKit/UIKit.h>
 #import "RMPScrollingMenuBar.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class RMPScrollingMenuBarController;
 
-typedef NS_ENUM(NSInteger, RMPMenuBarControllerDirection){
+typedef NS_ENUM(NSInteger, RMPMenuBarControllerDirection) {
     RMPScrollingMenuBarControllerDirectionLeft,
     RMPScrollingMenuBarControllerDirectionRight,
 };
@@ -35,19 +37,19 @@ typedef NS_ENUM(NSInteger, RMPMenuBarControllerDirection){
 @optional
 /** The delegate method which be called before select menu item.
  */
-- (void)menuBarController:(RMPScrollingMenuBarController*)menuBarController willSelectViewController:(UIViewController*)viewController;
+- (void)menuBarController:(RMPScrollingMenuBarController *)menuBarController willSelectViewController:(UIViewController *)viewController;
 
 /** The delegate method which be called after select menu item.
  */
-- (void)menuBarController:(RMPScrollingMenuBarController*)menuBarController didSelectViewController:(UIViewController*)viewController;
+- (void)menuBarController:(RMPScrollingMenuBarController *)menuBarController didSelectViewController:(UIViewController *)viewController;
 
 /** The delegate method which be called after selection was canceled.
  */
-- (void)menuBarController:(RMPScrollingMenuBarController*)menuBarController didCancelViewController:(UIViewController*)viewController;
+- (void)menuBarController:(RMPScrollingMenuBarController *)menuBarController didCancelViewController:(UIViewController *)viewController;
 
 /** The delegate method which be called when set up menu bar items dynamically.
  */
-- (RMPScrollingMenuBarItem*)menuBarController:(RMPScrollingMenuBarController*)menuBarController menuBarItemAtIndex:(NSInteger)index;
+- (RMPScrollingMenuBarItem *)menuBarController:(RMPScrollingMenuBarController *)menuBarController menuBarItemAtIndex:(NSInteger)index;
 
 @end
 
@@ -55,13 +57,13 @@ typedef NS_ENUM(NSInteger, RMPMenuBarControllerDirection){
 @protocol RMPScrollingMenuBarControllerTransitionDelegate <NSObject>
 
 @optional
-- (id <UIViewControllerAnimatedTransitioning>)menuBarController:(RMPScrollingMenuBarController*)menuBarController
+- (id <UIViewControllerAnimatedTransitioning>)menuBarController:(RMPScrollingMenuBarController *)menuBarController
                                 animationControllerForDirection:(RMPMenuBarControllerDirection)direction
                                              fromViewController:(UIViewController *)fromViewController
                                                toViewController:(UIViewController *)toViewController;
 
-- (id<UIViewControllerInteractiveTransitioning>)menuBarController:(RMPScrollingMenuBarController*)menuBarController
-                      interactionControllerForAnimationController:(id<UIViewControllerAnimatedTransitioning>)animationController;
+- (id <UIViewControllerInteractiveTransitioning>)menuBarController:(RMPScrollingMenuBarController *)menuBarController
+                       interactionControllerForAnimationController:(id <UIViewControllerAnimatedTransitioning>)animationController;
 @end
 
 /** Container type ViewController class of with a scrollable menu bar
@@ -70,31 +72,31 @@ typedef NS_ENUM(NSInteger, RMPMenuBarControllerDirection){
 
 /** ScrollingMenuBar object.
  */
-@property (nonatomic, readonly)RMPScrollingMenuBar* menuBar;
+@property (nonatomic, readonly) RMPScrollingMenuBar *menuBar;
 
 /** Container view for presenting view of child view controller.
  */
-@property (nonatomic, readonly)UIView*      containerView;
+@property (nonatomic, readonly) UIView *containerView;
 
 /** NSArray of child view controllers.
  */
-@property (nonatomic, retain)NSArray* viewControllers;
+@property (nonatomic, retain) NSArray *viewControllers;
 
 /** Selected view controller.
  */
-@property (nonatomic, weak)UIViewController* selectedViewController;
+@property (nonatomic, weak, nullable) UIViewController *selectedViewController;
 
 /** Index of selected view controller.
  */
-@property (nonatomic, assign)NSInteger       selectedIndex;
+@property (nonatomic, assign) NSInteger selectedIndex;
 
 /** Delegate object.
  */
-@property (nonatomic, weak)id<RMPScrollingMenuBarControllerDelegate> delegate;
+@property (nonatomic, weak, nullable) id<RMPScrollingMenuBarControllerDelegate> delegate;
 
 /** Transition Delegate object
  */
-@property (nonatomic, weak)id<RMPScrollingMenuBarControllerTransitionDelegate> transitionDelegate;
+@property (nonatomic, weak, nullable) id <RMPScrollingMenuBarControllerTransitionDelegate> transitionDelegate;
 
 /** Setter of view controllers.
  */
@@ -103,4 +105,7 @@ typedef NS_ENUM(NSInteger, RMPMenuBarControllerDirection){
 
 @end
 
+NS_ASSUME_NONNULL_END
+
 #import "UIViewController+RMPScrollingMenuBarControllerHelper.h"
+

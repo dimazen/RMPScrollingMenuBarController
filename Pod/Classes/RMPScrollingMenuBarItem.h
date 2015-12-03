@@ -34,14 +34,14 @@
  */
 @interface RMPScrollingMenuBarItem : NSObject
 
-@property (nonatomic, strong)NSString* title;
-@property (nonatomic, assign)NSInteger tag;
-@property (nonatomic, assign)CGFloat   width;
-@property (nonatomic, assign, getter=isEnabled)BOOL enabled;
-@property (nonatomic, assign, getter=isSelected)BOOL selected;
+@property (nonatomic, strong) NSString *title;
+@property (nonatomic, assign) NSInteger tag;
+@property (nonatomic, assign) CGFloat width;
+@property (nonatomic, assign, getter=isEnabled) BOOL enabled;
+@property (nonatomic, assign, getter=isSelected) BOOL selected;
 
 + (instancetype)item;
 
-- (RMPScrollingMenuBarButton*)button;
+- (RMPScrollingMenuBarButton *)button;
 
 @end

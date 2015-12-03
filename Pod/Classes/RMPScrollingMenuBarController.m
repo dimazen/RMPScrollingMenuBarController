@@ -26,16 +26,13 @@
 @end
 
 @implementation RMPScrollingMenuBarController {
-    NSArray* _items;
-
-    RMPScrollingMenuBarControllerTransition* _transition;
-    
+    NSArray *_items;
+    RMPScrollingMenuBarControllerTransition *_transition;
     RMPScrollingMenuBarDirection _menuBarDirection;
 }
 
 
-- (void)loadView
-{
+- (void)loadView {
     [super loadView];
 
     self.automaticallyAdjustsScrollViewInsets = NO;
@@ -45,7 +42,7 @@
     CGRect rect;
     // Menu bar
     rect = CGRectMake(0, 0, self.view.bounds.size.width, kRMPMenuBarDefaultBarHeight);
-    RMPScrollingMenuBar* menuBar = [[RMPScrollingMenuBar alloc] initWithFrame:rect];
+    RMPScrollingMenuBar *menuBar = [[RMPScrollingMenuBar alloc] initWithFrame:rect];
     _menuBar = menuBar;
     CGFloat offset = 32.0f / 320.0f * [[UIScreen mainScreen] bounds].size.width;
     _menuBar.itemInsets = UIEdgeInsetsMake(2, offset, 0, offset);
@@ -60,9 +57,9 @@
     // Container
     CGFloat y = CGRectGetMaxY(_menuBar.frame);
     rect = CGRectMake(0, y,
-                      self.view.bounds.size.width,
-                      self.view.bounds.size.height - y);
-    UIView* containerView = [[UIView alloc] initWithFrame:rect];
+        self.view.bounds.size.width,
+        self.view.bounds.size.height - y);
+    UIView *containerView = [[UIView alloc] initWithFrame:rect];
     _containerView = containerView;
     _containerView.backgroundColor = [UIColor colorWithWhite:0.8 alpha:1.0];
     [self.view addSubview:_containerView];
@@ -72,7 +69,7 @@
     _transition = [[RMPScrollingMenuBarControllerTransition alloc] initWithMenuBarController:self];
     self.transitionDelegate = _transition;
 
-    if([_viewControllers count] > 0){
+    if ([_viewControllers count] > 0) {
         [self updateMenuBarWithViewControllers:_viewControllers animated:NO];
         [self setSelectedViewController:_viewControllers[0]];
     }
@@ -88,8 +85,7 @@
     // Dispose of any resources that can be recreated.
 }
 
-- (void)viewWillLayoutSubviews
-{
+- (void)viewWillLayoutSubviews {
     [super viewWillLayoutSubviews];
 
     CGRect rect;
@@ -97,47 +93,44 @@
     _menuBar.frame = rect;
 
     rect = CGRectMake(0, CGRectGetMaxY(_menuBar.frame),
-                      self.view.bounds.size.width,
-                      self.view.bounds.size.height - CGRectGetMaxY(_menuBar.frame));
+        self.view.bounds.size.width,
+        self.view.bounds.size.height - CGRectGetMaxY(_menuBar.frame));
     _containerView.frame = rect;
 
 
 }
 
-- (void)viewDidAppear:(BOOL)animated
-{
+- (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
 }
 
 #pragma mark -
-- (void)setViewControllers:(NSArray *)viewControllers
-{
+
+- (void)setViewControllers:(NSArray *)viewControllers {
     [self setViewControllers:viewControllers animated:NO];
 }
 
-- (void)setViewControllers:(NSArray *)viewControllers animated:(BOOL)animated
-{
+- (void)setViewControllers:(NSArray *)viewControllers animated:(BOOL)animated {
     _viewControllers = [viewControllers copy];
 
-    if(_menuBar){
+    if (_menuBar) {
         [self updateMenuBarWithViewControllers:_viewControllers animated:animated];
     }
 
-    if([_viewControllers count] > 0){
+    if ([_viewControllers count] > 0) {
         [self setSelectedViewController:_viewControllers[0]];
     }
 }
 
-- (void)updateMenuBarWithViewControllers:(NSArray*)viewControllers animated:(BOOL)animated
-{
+- (void)updateMenuBarWithViewControllers:(NSArray *)viewControllers animated:(BOOL)animated {
     // Update menu bar items.
-    NSMutableArray* items = [NSMutableArray array];
-    RMPScrollingMenuBarItem* item = nil;
+    NSMutableArray *items = [NSMutableArray array];
+    RMPScrollingMenuBarItem *item = nil;
     int i = 0;
-    for(UIViewController* vc in viewControllers){
-        if([_delegate respondsToSelector:@selector(menuBarController:menuBarItemAtIndex:)]){
+    for (UIViewController *vc in viewControllers) {
+        if ([_delegate respondsToSelector:@selector(menuBarController:menuBarItemAtIndex:)]) {
             item = [_delegate menuBarController:self menuBarItemAtIndex:i];
-        }else {
+        } else {
             item = [RMPScrollingMenuBarItem item];
             item.title = vc.title;
             item.tag = i;
@@ -150,25 +143,23 @@
     [_menuBar setItems:_items animated:animated];
 }
 
-- (void)setSelectedViewController:(UIViewController *)selectedViewController
-{
-    if([_viewControllers containsObject:selectedViewController]){
+- (void)setSelectedViewController:(UIViewController *)selectedViewController {
+    if ([_viewControllers containsObject:selectedViewController]) {
         [self transitionToViewController:selectedViewController];
     }
 }
 
-- (void)setSelectedIndex:(NSInteger)selectedIndex
-{
-    if(selectedIndex >= 0
-       && selectedIndex < [_viewControllers count]
-       && selectedIndex != _selectedIndex){
+- (void)setSelectedIndex:(NSInteger)selectedIndex {
+    if (selectedIndex >= 0
+        && selectedIndex < [_viewControllers count]
+        && selectedIndex != _selectedIndex) {
         [self setSelectedViewController:_viewControllers[selectedIndex]];
     }
 }
 
 #pragma mark - Private
-- (void)transitionToViewController:(UIViewController*)toViewController
-{
+
+- (void)transitionToViewController:(UIViewController *)toViewController {
     UIViewController *fromViewController = _selectedViewController;
     // Do nothing if toViewController equals to fromViewController.
     if (toViewController == fromViewController || !_containerView) {
@@ -186,7 +177,7 @@
     [fromViewController willMoveToParentViewController:nil];
     [self addChildViewController:toViewController];
 
-    if([_delegate respondsToSelector:@selector(menuBarController:willSelectViewController:)]){
+    if ([_delegate respondsToSelector:@selector(menuBarController:willSelectViewController:)]) {
         [_delegate menuBarController:self willSelectViewController:toViewController];
     }
 
@@ -205,26 +196,26 @@
     NSInteger fromIndex = [_viewControllers indexOfObject:fromViewController];
     NSInteger toIndex = [_viewControllers indexOfObject:toViewController];
     RMPMenuBarControllerDirection direction = RMPScrollingMenuBarControllerDirectionLeft;
-    if(toIndex > fromIndex){
+    if (toIndex > fromIndex) {
         direction = RMPScrollingMenuBarControllerDirectionRight;
     }
-    
-    if(self.menuBar.style == RMPScrollingMenuBarStyleInfinitePaging){
-        if(toIndex == 0 && fromIndex == _viewControllers.count-1){
+
+    if (self.menuBar.style == RMPScrollingMenuBarStyleInfinitePaging) {
+        if (toIndex == 0 && fromIndex == _viewControllers.count - 1) {
             direction = RMPScrollingMenuBarControllerDirectionRight;
-        }else if(toIndex == _viewControllers.count-1 && fromIndex == 0){
+        } else if (toIndex == _viewControllers.count - 1 && fromIndex == 0) {
             direction = RMPScrollingMenuBarControllerDirectionLeft;
         }
-        
-        if(_menuBarDirection == RMPScrollingMenuBarDirectionRight){
+
+        if (_menuBarDirection == RMPScrollingMenuBarDirectionRight) {
             direction = RMPScrollingMenuBarControllerDirectionRight;
-        }else if(_menuBarDirection == RMPScrollingMenuBarDirectionLeft){
+        } else if (_menuBarDirection == RMPScrollingMenuBarDirectionLeft) {
             direction = RMPScrollingMenuBarControllerDirectionLeft;
         }
         _menuBarDirection = RMPScrollingMenuBarDirectionNone;
     }
 
-    id<UIViewControllerAnimatedTransitioning> animator = nil;
+    id <UIViewControllerAnimatedTransitioning> animator = nil;
     if ([_transitionDelegate respondsToSelector:@selector(menuBarController:animationControllerForDirection:fromViewController:toViewController:)]) {
         animator = [_transitionDelegate menuBarController:self
                           animationControllerForDirection:direction
@@ -233,21 +224,21 @@
     }
     animator = (animator ?: [[RMPScrollingMenuBarControllerAnimator alloc] init]);
 
-    UIPercentDrivenInteractiveTransition* interactionController = nil;
-    if([_transitionDelegate respondsToSelector:@selector(menuBarController:interactionControllerForAnimationController:)]) {
+    UIPercentDrivenInteractiveTransition *interactionController = nil;
+    if ([_transitionDelegate respondsToSelector:@selector(menuBarController:interactionControllerForAnimationController:)]) {
         interactionController = [_transitionDelegate menuBarController:self
                            interactionControllerForAnimationController:animator];
     }
 
-    RMPScrollingMenuBarControllerTransitionContextCompletionBlock completion = ^(BOOL didComplete){
-        if(didComplete){
+    RMPScrollingMenuBarControllerTransitionContextCompletionBlock completion = ^(BOOL didComplete) {
+        if (didComplete) {
             [fromViewController.view removeFromSuperview];
             [fromViewController removeFromParentViewController];
             [toViewController didMoveToParentViewController:self];
 
             // Reflect selection state.
             [self finishTransitionWithViewController:toViewController cancelViewController:nil];
-        }else {
+        } else {
             // Remove toViewController from parent view controller by cancelled.
             [toViewController.view removeFromSuperview];
             [toViewController removeFromParentViewController];
@@ -260,59 +251,57 @@
 
     };
 
-    RMPScrollingMenuBarControllerTransitionContext* transitionContext = nil;
+    RMPScrollingMenuBarControllerTransitionContext *transitionContext = nil;
     transitionContext = [[RMPScrollingMenuBarControllerTransitionContext alloc] initWithMenuBarController:self
-                                                                               fromViewController:fromViewController
-                                                                                 toViewController:toViewController
-                                                                                        direction:direction
-                                                                                         animator:animator
-                                                                            interactionController:interactionController
-                                                                                       completion:completion];
+                                                                                       fromViewController:fromViewController
+                                                                                         toViewController:toViewController
+                                                                                                direction:direction
+                                                                                                 animator:animator
+                                                                                    interactionController:interactionController
+                                                                                               completion:completion];
 
 
-
-    if(transitionContext.isInteractive){
+    if (transitionContext.isInteractive) {
         [interactionController startInteractiveTransition:transitionContext];
-    }else {
+    } else {
         [animator animateTransition:transitionContext];
     }
 }
 
-- (void)finishTransitionWithViewController:(UIViewController*)viewController cancelViewController:(UIViewController*)cancelViewController
-{
+- (void)finishTransitionWithViewController:(UIViewController *)viewController cancelViewController:(UIViewController *)cancelViewController {
     NSInteger lastIndex = _selectedIndex;
-    UIViewController* lastViewController = _selectedViewController;
+    UIViewController *lastViewController = _selectedViewController;
 
     // Reflect selection state.
     _selectedViewController = viewController;
     _selectedIndex = [_viewControllers indexOfObject:viewController];
 
     // Update menu bar.
-    RMPScrollingMenuBarItem* item = _menuBar.items[_selectedIndex];
-    if(item != _menuBar.selectedItem){
+    RMPScrollingMenuBarItem *item = _menuBar.items[_selectedIndex];
+    if (item != _menuBar.selectedItem) {
         [_menuBar setSelectedItem:item];
     }
 
     // Call delegate method.
-    if(lastIndex != _selectedIndex || lastViewController != _selectedViewController){
-        if([_delegate respondsToSelector:@selector(menuBarController:didSelectViewController:)]){
+    if (lastIndex != _selectedIndex || lastViewController != _selectedViewController) {
+        if ([_delegate respondsToSelector:@selector(menuBarController:didSelectViewController:)]) {
             [_delegate menuBarController:self didSelectViewController:_selectedViewController];
         }
-    }else {
-        if([_delegate respondsToSelector:@selector(menuBarController:didCancelViewController:)]){
+    } else {
+        if ([_delegate respondsToSelector:@selector(menuBarController:didCancelViewController:)]) {
             [_delegate menuBarController:self didCancelViewController:cancelViewController];
         }
     }
-    
+
     _menuBar.userInteractionEnabled = YES;
 }
 
 #pragma mark - RMPScrollingMenuBarDelegate
-- (void)menuBar:(RMPScrollingMenuBar*)menuBar didSelectItem:(RMPScrollingMenuBarItem*)item direction:(RMPScrollingMenuBarDirection)direction
-{
+
+- (void)menuBar:(RMPScrollingMenuBar *)menuBar didSelectItem:(RMPScrollingMenuBarItem *)item direction:(RMPScrollingMenuBarDirection)direction {
     NSInteger index = [_items indexOfObject:item];
-    if(index != NSNotFound
-       && index != self.selectedIndex){
+    if (index != NSNotFound
+        && index != self.selectedIndex) {
         // Switch view controller.
         _menuBarDirection = direction;
         [self setSelectedIndex:index];
