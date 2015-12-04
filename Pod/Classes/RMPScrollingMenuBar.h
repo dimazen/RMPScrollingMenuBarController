@@ -94,6 +94,10 @@ typedef NS_ENUM(NSInteger, RMPScrollingMenuBarDirection) {
  */
 - (void)scrollByRatio:(CGFloat)ratio from:(CGFloat)from;
 
+@property (nonatomic, strong) UIFont *itemsFont;
+@property (nonatomic, strong) UIColor *itemsDefaultColor;
+@property (nonatomic, strong) UIColor *itemsSelectedColor;
+
 @end
 
 NS_ASSUME_NONNULL_END

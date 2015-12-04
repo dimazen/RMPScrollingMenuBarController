@@ -91,10 +91,12 @@
     _showsIndicator = YES;
     _showsSeparatorLine = YES;
     _indicatorHeight = 4;
-//    CGFloat offset = floorf(0.1f * [[UIScreen mainScreen] bounds].size.width);
-//    _itemInsets = UIEdgeInsetsMake(2.f, offset, 0, offset);
     _itemInsets = UIEdgeInsetsMake(2.f, 10.f, 0, 10.f);
     _indicatorColor = [UIColor colorWithRed:0.988 green:0.224 blue:0.129 alpha:1.0];
+
+    _itemsFont = [UIFont systemFontOfSize:16.f];
+    _itemsDefaultColor = [UIColor colorWithRed:0.647 green:0.631 blue:0.604 alpha:1.000];
+    _itemsSelectedColor = [UIColor colorWithRed:0.988 green:0.224 blue:0.129 alpha:1.000];
 
     _views = [[NSMutableArray alloc] init];
 
@@ -348,16 +350,43 @@
     _border.hidden = !_showsSeparatorLine;
 }
 
+- (void)setItemsFont:(UIFont *)itemsFont {
+    _itemsFont = itemsFont;
+
+    [self updateViewsAppearance];
+}
+
+- (void)setItemsDefaultColor:(UIColor *)itemsDefaultColor {
+    _itemsDefaultColor = itemsDefaultColor;
+
+    [self updateViewsAppearance];
+}
+
+- (void)setItemsSelectedColor:(UIColor *)itemsSelectedColor {
+    _itemsSelectedColor = itemsSelectedColor;
+
+    [self updateViewsAppearance];
+}
+
+- (void)applyAppearanceToView:(RMPScrollingMenuBarButton *)view {
+    view.titleLabel.font = self.itemsFont;
+    [view setTitleColor:self.itemsDefaultColor forState:UIControlStateNormal];
+    [view setTitleColor:self.itemsSelectedColor forState:UIControlStateSelected];
+}
+
+- (void)updateViewsAppearance {
+    for (RMPScrollingMenuBarButton *view in _views) {
+        [self applyAppearanceToView:view];
+    }
+}
+
 #pragma mark - Views
 
 - (RMPScrollingMenuBarButton *)newViewForItem:(RMPScrollingMenuBarItem *)item {
     RMPScrollingMenuBarButton *view = [[RMPScrollingMenuBarButton alloc] init];
 
-    view.titleLabel.font = [UIFont systemFontOfSize:16.0];
+    [self applyAppearanceToView:view];
     [view setTitle:item.title forState:UIControlStateNormal];
-    [view setTitleColor:[UIColor colorWithRed:0.647 green:0.631 blue:0.604 alpha:1.000] forState:UIControlStateNormal];
-    [view setTitleColor:[UIColor colorWithWhite:0.886 alpha:1.000] forState:UIControlStateDisabled];
-    [view setTitleColor:[UIColor colorWithRed:0.988 green:0.224 blue:0.129 alpha:1.000] forState:UIControlStateSelected];
     view.exclusiveTouch = NO;
 
     [view addTarget:self action:@selector(didTapMenuButton:) forControlEvents:UIControlEventTouchUpInside];
