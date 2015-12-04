@@ -46,6 +46,9 @@
 
 @interface RMPScrollingMenuBar () <UIScrollViewDelegate>
 
+@property (nonatomic, strong) NSMutableDictionary *itemTextAttributes;
+@property (nonatomic, strong) NSDictionary *defaultItemTextAttributes;
+
 @end
 
 @implementation RMPScrollingMenuBar {
@@ -90,13 +93,16 @@
 - (void)setup {
     _showsIndicator = YES;
     _showsSeparatorLine = YES;
-    _indicatorHeight = 4;
+    _indicatorHeight = 2;
     _itemInsets = UIEdgeInsetsMake(2.f, 10.f, 0, 10.f);
     _indicatorColor = [UIColor colorWithRed:0.988 green:0.224 blue:0.129 alpha:1.0];
 
-    _itemsFont = [UIFont systemFontOfSize:16.f];
-    _itemsDefaultColor = [UIColor colorWithRed:0.647 green:0.631 blue:0.604 alpha:1.000];
-    _itemsSelectedColor = [UIColor colorWithRed:0.988 green:0.224 blue:0.129 alpha:1.000];
+    _itemTextAttributes = [[NSMutableDictionary alloc] init];
+
+    _defaultItemTextAttributes = @{
+        @(UIControlStateNormal): [UIColor colorWithRed:0.647 green:0.631 blue:0.604 alpha:1],
+        @(UIControlStateSelected): [UIColor colorWithRed:0.988 green:0.224 blue:0.129 alpha:1.000]
+    };
 
     _views = [[NSMutableArray alloc] init];
 
@@ -350,28 +356,46 @@
     _border.hidden = !_showsSeparatorLine;
 }
 
-- (void)setItemsFont:(UIFont *)itemsFont {
-    _itemsFont = itemsFont;
+- (void)setItemTextEdgeInsets:(UIEdgeInsets)itemTextEdgeInsets {
+    _itemTextEdgeInsets = itemTextEdgeInsets;
 
     [self updateViewsAppearance];
+    [self setNeedsLayout];
 }
 
-- (void)setItemsDefaultColor:(UIColor *)itemsDefaultColor {
-    _itemsDefaultColor = itemsDefaultColor;
+- (void)setItemTextFont:(UIFont *)itemTextFont {
+    _itemTextFont = itemTextFont;
 
-    [self updateViewsAppearance];
+    [self setNeedsUpdateViewsAppearance];
 }
 
-- (void)setItemsSelectedColor:(UIColor *)itemsSelectedColor {
-    _itemsSelectedColor = itemsSelectedColor;
+- (void)setItemTextColor:(UIColor *)color forState:(UIControlState)state {
+    _itemTextAttributes[@(state)] = color;
 
-    [self updateViewsAppearance];
+    [self setNeedsUpdateViewsAppearance];
 }
+
+- (UIColor *)itemTextColorForState:(UIControlState)state {
+    return _itemTextAttributes[@(state)];
+}
+
+- (UIColor *)safeItemTextColorForState:(UIControlState)state {
+    return _itemTextAttributes[@(state)] ?: _defaultItemTextAttributes[@(state)];
+}
+
+
+#pragma mark - Appearance
 
 - (void)applyAppearanceToView:(RMPScrollingMenuBarButton *)view {
-    view.titleLabel.font = self.itemsFont;
-    [view setTitleColor:self.itemsDefaultColor forState:UIControlStateNormal];
-    [view setTitleColor:self.itemsSelectedColor forState:UIControlStateSelected];
+    view.titleLabel.font = self.itemTextFont ?: [UIFont systemFontOfSize:16.f];
+    [view setTitleColor:[self safeItemTextColorForState:UIControlStateNormal] forState:UIControlStateNormal];
+    [view setTitleColor:[self safeItemTextColorForState:UIControlStateSelected] forState:UIControlStateSelected];
+    [view setTitleEdgeInsets:self.itemTextEdgeInsets];
+}
+
+- (void)setNeedsUpdateViewsAppearance {
+    [RMPScrollingMenuBar cancelPreviousPerformRequestsWithTarget:self selector:@selector(updateViewsAppearance) object:nil];
+    [self performSelector:@selector(updateViewsAppearance) withObject:nil afterDelay:0 inModes:@[NSRunLoopCommonModes]];
 }
 
 - (void)updateViewsAppearance {

@@ -20,14 +20,9 @@
 
 #import <UIKit/UIKit.h>
 
-#define kRMPScrollingMenuBarItemDefaultWidth 90.0f
+NS_ASSUME_NONNULL_BEGIN
 
-/** MenuBar's button class
- */
 @interface RMPScrollingMenuBarButton : UIButton
-
-+ (instancetype)button;
-
 @end
 
 FOUNDATION_EXTERN const CGFloat RMPScrollingMenuBarItemWidthAutomatic;
@@ -41,6 +36,6 @@ FOUNDATION_EXTERN const CGFloat RMPScrollingMenuBarItemWidthAutomatic;
 
 + (instancetype)item;
 
-- (RMPScrollingMenuBarButton *)button;
-
 @end
+
+NS_ASSUME_NONNULL_END
