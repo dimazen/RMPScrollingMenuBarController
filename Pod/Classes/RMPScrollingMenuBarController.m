@@ -58,7 +58,7 @@ const CGFloat RMPMenuBarDefaultBarHeight = 64.f;
 
     _menuBar = [[RMPScrollingMenuBar alloc] initWithFrame:self.view.bounds];
     self.menuBar.translatesAutoresizingMaskIntoConstraints = NO;
-    self.menuBar.backgroundColor = [UIColor redColor];
+    self.menuBar.backgroundColor = [UIColor whiteColor];
     self.menuBar.delegate = self;
     [self.view addSubview:self.menuBar];
 

@@ -55,7 +55,7 @@
 
     CGFloat _indicatorHeight;
 
-    NSMutableArray <UIButton *>*_views;
+    NSMutableArray <RMPScrollingMenuBarButton *>*_views;
 }
 
 - (instancetype)init {
@@ -91,8 +91,9 @@
     _showsIndicator = YES;
     _showsSeparatorLine = YES;
     _indicatorHeight = 4;
-    CGFloat offset = floorf(0.1f * [[UIScreen mainScreen] bounds].size.width);
-    _itemInsets = UIEdgeInsetsMake(2.f, offset, 0, offset);
+//    CGFloat offset = floorf(0.1f * [[UIScreen mainScreen] bounds].size.width);
+//    _itemInsets = UIEdgeInsetsMake(2.f, offset, 0, offset);
+    _itemInsets = UIEdgeInsetsMake(2.f, 10.f, 0, 10.f);
     _indicatorColor = [UIColor colorWithRed:0.988 green:0.224 blue:0.129 alpha:1.0];
 
     _views = [[NSMutableArray alloc] init];
@@ -100,7 +101,7 @@
     RMPScrollingMenuBarScrollView *scrollView = [[RMPScrollingMenuBarScrollView alloc] initWithFrame:self.bounds];
     _scrollView = scrollView;
     _scrollView.showsVerticalScrollIndicator = NO;
-    _scrollView.showsHorizontalScrollIndicator = YES;
+    _scrollView.showsHorizontalScrollIndicator = NO;
     _scrollView.contentOffset = CGPointZero;
     _scrollView.scrollsToTop = NO;
     _scrollView.pagingEnabled = NO;
@@ -131,17 +132,16 @@
 #pragma mark - Reload
 
 - (void)reloadItems {
-    for (UIButton *button in _views) {
-        [button removeTarget:self action:@selector(didTapMenuButton:) forControlEvents:UIControlEventTouchUpInside];
-        [button removeFromSuperview];
-    }
-
+    [_views makeObjectsPerformSelector:@selector(removeFromSuperview)];
     [_views removeAllObjects];
 
-    for (RMPScrollingMenuBarItem *item in _items) {
-        RMPScrollingMenuBarButton *view = item.button;
+    if (_items.count == 0) {
+        return;
+    }
 
-        [view addTarget:self action:@selector(didTapMenuButton:) forControlEvents:UIControlEventTouchUpInside];
+    for (RMPScrollingMenuBarItem *item in _items) {
+        RMPScrollingMenuBarButton *view = [self newViewForItem:item];
+
         [_scrollView addSubview:view];
         [_views addObject:view];
     }
@@ -163,14 +163,15 @@
 }
 
 - (void)layoutItemsViews {
+    const CGFloat viewHeight = _scrollView.bounds.size.height - _itemInsets.top + _itemInsets.bottom;
     __block CGFloat offset = _itemInsets.left;
-    [_views enumerateObjectsUsingBlock:^(UIButton *view, NSUInteger idx, BOOL *_) {
+    [_views enumerateObjectsUsingBlock:^(RMPScrollingMenuBarButton *view, NSUInteger idx, BOOL *_) {
         RMPScrollingMenuBarItem *item = _items[idx];
         CGRect frame = CGRectMake(
             offset,
             _itemInsets.top,
-            item.width,
-            _scrollView.bounds.size.height - _itemInsets.top + _itemInsets.bottom
+            [self contentWidthForItem:item view:view fittingHeight:viewHeight],
+            viewHeight
         );
         view.frame = frame;
         offset += frame.size.width + _itemInsets.right + _itemInsets.left;
@@ -179,17 +180,18 @@
     CGFloat contentWidth = offset - _itemInsets.left;
     if (contentWidth < _scrollView.bounds.size.width) {
         CGFloat delta = _scrollView.bounds.size.width - contentWidth;
-        CGFloat space = floorf(delta / _views.count + 1);
+        CGFloat space = floorf(delta / (_views.count + 1));
 
         [_views enumerateObjectsUsingBlock:^(UIButton *view, NSUInteger idx, BOOL *stop) {
-            CGRect frame = CGRectOffset(view.frame, (idx * 2 + 1) * space, 0.f);
+            CGRect frame = CGRectOffset(view.frame, (idx + 1) * space, 0.f);
             view.frame = frame;
         }];
 
         contentWidth = _scrollView.bounds.size.width;
     }
 
-    _scrollView.contentSize = CGSizeMake(contentWidth, _scrollView.bounds.size.height);
+    const CGFloat contentHeight = _scrollView.bounds.size.height;
+    _scrollView.contentSize = CGSizeMake(contentWidth, contentHeight);
 }
 
 - (void)layoutSubviews {
@@ -207,6 +209,10 @@
     _indicatorView.frame = indicatorFrame;
 
     [self layoutItemsViews];
+
+    if (self.items.count > 0) {
+        [self layoutIndexSelection:self.selectedIndex animated:NO];
+    }
 }
 
 - (CGFloat)scrollOffsetX {
@@ -224,6 +230,7 @@
                 return;
             }
         }
+
         if (index == ignoreCount && ratio < 0.0) {
             return;
         } else if (index == _items.count - 1 - ignoreCount && ratio > 0.0) {
@@ -251,8 +258,15 @@
     _selectedIndex = selectedIndex;
     [self selectViewAtIndex:_selectedIndex];
 
-    self.userInteractionEnabled = NO;
-    UIView *view = _views[_selectedIndex];
+    [self layoutIndexSelection:_selectedIndex animated:animated];
+}
+
+- (void)setSelectedIndex:(NSInteger)selectedIndex {
+    [self setSelectedIndex:selectedIndex animated:YES];
+}
+
+- (void)layoutIndexSelection:(NSInteger)index animated:(BOOL)animated {
+    UIView *view = _views[index];
     // Selected item want to be displayed to center as possible.
     CGPoint offset = CGPointZero;
     CGPoint newPosition = CGPointZero;
@@ -283,20 +297,26 @@
             dur = 0.6;
         }
 
-        UIViewAnimationOptions options = UIViewAnimationOptionCurveEaseInOut;
-        [UIView animateWithDuration:dur delay:0.16 usingSpringWithDamping:0.8 initialSpringVelocity:0.1 options:options animations:^{
-             CGRect f = _indicatorView.frame;
-             f.origin.x = newPosition.x - 3;
-             f.size.width = view.frame.size.width + 6;
-             _indicatorView.frame = f;
-        } completion:^(BOOL finished) {
-            self.userInteractionEnabled = YES;
-        }];
-    }
-}
+        void (^adjust)(void) = ^{
+            CGRect f = _indicatorView.frame;
+            f.origin.x = newPosition.x - 3;
+            f.size.width = view.frame.size.width + 6;
+            _indicatorView.frame = f;
+        };
 
-- (void)setSelectedIndex:(NSInteger)selectedIndex {
-    [self setSelectedIndex:selectedIndex animated:YES];
+        if (animated) {
+            UIViewAnimationOptions options = UIViewAnimationOptionCurveEaseInOut;
+            [UIView animateWithDuration:dur
+                                  delay:0.16
+                 usingSpringWithDamping:0.8
+                  initialSpringVelocity:0.1
+                                options:options
+                             animations:adjust
+                             completion:NULL];
+        } else {
+            adjust();
+        }
+    }
 }
 
 - (void)selectViewAtIndex:(NSInteger)index {
@@ -326,6 +346,36 @@
 - (void)setShowsSeparatorLine:(BOOL)showsSeparatorLine {
     _showsSeparatorLine = showsSeparatorLine;
     _border.hidden = !_showsSeparatorLine;
+}
+
+#pragma mark - Views
+
+- (RMPScrollingMenuBarButton *)newViewForItem:(RMPScrollingMenuBarItem *)item {
+    RMPScrollingMenuBarButton *view = [[RMPScrollingMenuBarButton alloc] init];
+
+    view.titleLabel.font = [UIFont systemFontOfSize:16.0];
+    [view setTitle:item.title forState:UIControlStateNormal];
+    [view setTitleColor:[UIColor colorWithRed:0.647 green:0.631 blue:0.604 alpha:1.000] forState:UIControlStateNormal];
+    [view setTitleColor:[UIColor colorWithWhite:0.886 alpha:1.000] forState:UIControlStateDisabled];
+    [view setTitleColor:[UIColor colorWithRed:0.988 green:0.224 blue:0.129 alpha:1.000] forState:UIControlStateSelected];
+    view.exclusiveTouch = NO;
+
+    [view addTarget:self action:@selector(didTapMenuButton:) forControlEvents:UIControlEventTouchUpInside];
+
+    return view;
+}
+
+- (CGFloat)contentWidthForItem:(RMPScrollingMenuBarItem *)item view:(RMPScrollingMenuBarButton *)view fittingHeight:(CGFloat)height {
+    if (item.width == RMPScrollingMenuBarItemWidthAutomatic) {
+        [view setNeedsLayout];
+        [view layoutIfNeeded];
+        CGSize fittingSize = [view systemLayoutSizeFittingSize:CGSizeMake(UILayoutFittingCompressedSize.height, height)
+                                 withHorizontalFittingPriority:UILayoutPriorityFittingSizeLevel
+                                       verticalFittingPriority:UILayoutPriorityRequired];
+        return fittingSize.width;
+    }
+
+    return item.width;
 }
 
 #pragma mark - Selection Handling
