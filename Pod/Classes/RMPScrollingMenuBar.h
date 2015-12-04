@@ -21,11 +21,10 @@
 #import <UIKit/UIKit.h>
 #import "RMPScrollingMenuBarItem.h"
 
-#define kRMPMenuBarDefaultBarHeight 36.0f
+NS_ASSUME_NONNULL_BEGIN
 
 typedef NS_ENUM(NSUInteger, RMPScrollingMenuBarStyle) {
-    RMPScrollingMenuBarStyleNormal,
-    RMPScrollingMenuBarStyleStatic,
+    RMPScrollingMenuBarStyleNormal
 };
 
 typedef NS_ENUM(NSInteger, RMPScrollingMenuBarDirection) {
@@ -62,7 +61,8 @@ typedef NS_ENUM(NSInteger, RMPScrollingMenuBarDirection) {
 
 /** Selected menu item.
  */
-@property (nonatomic, weak) RMPScrollingMenuBarItem *selectedItem;
+@property (nonatomic, nullable, readonly) RMPScrollingMenuBarItem *selectedItem;
+@property (nonatomic) NSInteger selectedIndex;
 
 /** A Boolean value that controls whether the indicator is visible or not. 
     Default value is YES.
@@ -94,5 +94,6 @@ typedef NS_ENUM(NSInteger, RMPScrollingMenuBarDirection) {
  */
 - (void)scrollByRatio:(CGFloat)ratio from:(CGFloat)from;
 
-
 @end
+
+NS_ASSUME_NONNULL_END

@@ -25,7 +25,6 @@ const CGFloat RMPMenuBarDefaultBarHeight = 64.f;
 
 @interface RMPScrollingMenuBarController () <RMPScrollingMenuBarDelegate>
 
-@property (nonatomic, strong) NSArray *usedConstraints;
 @property (nonatomic, strong) NSLayoutConstraint *barHeightConstraint;
 
 @end
@@ -40,7 +39,6 @@ const CGFloat RMPMenuBarDefaultBarHeight = 64.f;
     self = [super initWithCoder:aDecoder];
     if (self) {
         _barHeight = RMPMenuBarDefaultBarHeight;
-//        self.edgesForExtendedLayout = UIRectEdgeLeft | UIRectEdgeRight | UIRectEdgeBottom;
     }
 
     return self;
@@ -159,7 +157,6 @@ const CGFloat RMPMenuBarDefaultBarHeight = 64.f;
         } else {
             item = [RMPScrollingMenuBarItem item];
             item.title = vc.title;
-            item.tag = index;
         }
         [items addObject:item];
 
@@ -288,11 +285,7 @@ const CGFloat RMPMenuBarDefaultBarHeight = 64.f;
     _selectedViewController = viewController;
     _selectedIndex = [_viewControllers indexOfObject:viewController];
 
-    // Update menu bar.
-    RMPScrollingMenuBarItem *item = _menuBar.items[_selectedIndex];
-    if (item != _menuBar.selectedItem) {
-        [_menuBar setSelectedItem:item];
-    }
+    _menuBar.selectedIndex = _selectedIndex;
 
     // Call delegate method.
     if (lastIndex != _selectedIndex || lastViewController != _selectedViewController) {

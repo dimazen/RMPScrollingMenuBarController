@@ -30,15 +30,14 @@
 
 @end
 
+FOUNDATION_EXTERN const CGFloat RMPScrollingMenuBarItemWidthAutomatic;
+
 /** MenuBar's item class
  */
 @interface RMPScrollingMenuBarItem : NSObject
 
 @property (nonatomic, strong) NSString *title;
-@property (nonatomic, assign) NSInteger tag;
 @property (nonatomic, assign) CGFloat width;
-@property (nonatomic, assign, getter=isEnabled) BOOL enabled;
-@property (nonatomic, assign, getter=isSelected) BOOL selected;
 
 + (instancetype)item;
 
