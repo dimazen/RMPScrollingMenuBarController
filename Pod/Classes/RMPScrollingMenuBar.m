@@ -90,11 +90,11 @@
 - (void)setup {
     _showsIndicator = YES;
     _showsSeparatorLine = YES;
-
     _indicatorHeight = 4;
+    CGFloat offset = floorf(0.1f * [[UIScreen mainScreen] bounds].size.width);
+    _itemInsets = UIEdgeInsetsMake(2.f, offset, 0, offset);
+    _indicatorColor = [UIColor colorWithRed:0.988 green:0.224 blue:0.129 alpha:1.0];
 
-    _itemInsets = UIEdgeInsetsZero;
-    _indicatorColor = [UIColor colorWithRed:0.988 green:0.224 blue:0.129 alpha:1.000];
     _views = [[NSMutableArray alloc] init];
 
     RMPScrollingMenuBarScrollView *scrollView = [[RMPScrollingMenuBarScrollView alloc] initWithFrame:self.bounds];
