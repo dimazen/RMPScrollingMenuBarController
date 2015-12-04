@@ -52,6 +52,10 @@
     RMPScrollingMenuBarScrollView *_scrollView;
     UIView *_indicatorView;
     UIView *_border;
+
+    CGFloat _indicatorHeight;
+
+    NSMutableArray <UIButton *>*_views;
 }
 
 - (instancetype)init {
@@ -68,26 +72,6 @@
         [self setup];
     }
     return self;
-}
-
-- (void)layoutSubviews {
-    _scrollView.frame = self.bounds;
-    _scrollView.contentInset = UIEdgeInsetsZero;
-
-    CGFloat lineWidth = 1.0f / [[UIScreen mainScreen] scale];
-    _border.frame = CGRectMake(0, self.bounds.size.height - lineWidth, self.bounds.size.width, lineWidth);
-
-    CGRect indicatorFrame = _indicatorView.frame;
-    indicatorFrame.origin.y = self.bounds.size.height - 4;
-    _indicatorView.frame = indicatorFrame;
-}
-
-- (void)setFrame:(CGRect)frame {
-    [super setFrame:frame];
-
-    CGSize contentSize = _scrollView.contentSize;
-    contentSize.height = CGRectGetHeight(frame);
-    _scrollView.contentSize = contentSize;
 }
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
@@ -107,20 +91,28 @@
     _showsIndicator = YES;
     _showsSeparatorLine = YES;
 
+    _indicatorHeight = 4;
+
     _itemInsets = UIEdgeInsetsZero;
     _indicatorColor = [UIColor colorWithRed:0.988 green:0.224 blue:0.129 alpha:1.000];
+    _views = [[NSMutableArray alloc] init];
 
     RMPScrollingMenuBarScrollView *scrollView = [[RMPScrollingMenuBarScrollView alloc] initWithFrame:self.bounds];
     _scrollView = scrollView;
     _scrollView.showsVerticalScrollIndicator = NO;
-    _scrollView.showsHorizontalScrollIndicator = NO;
+    _scrollView.showsHorizontalScrollIndicator = YES;
     _scrollView.contentOffset = CGPointZero;
     _scrollView.scrollsToTop = NO;
+    _scrollView.pagingEnabled = NO;
+    _scrollView.decelerationRate = UIScrollViewDecelerationRateNormal;
+    _scrollView.clipsToBounds = YES;
+    _scrollView.backgroundColor = [UIColor clearColor];
+
     [self addSubview:_scrollView];
 
-    UIView *indicator = [[UIView alloc] initWithFrame:CGRectMake(0, self.bounds.size.height - 4, 0, 2)];
+    UIView *indicator = [[UIView alloc] init];
     _indicatorView = indicator;
-    _indicatorView.backgroundColor = _indicatorColor;
+    _indicatorView.backgroundColor = self.indicatorColor;
     [_scrollView addSubview:_indicatorView];
 
     UIView *border = [[UIView alloc] initWithFrame:CGRectMake(0, self.bounds.size.height - 0.25f, self.bounds.size.width, 0.25f)];
@@ -136,6 +128,27 @@
     }
 }
 
+#pragma mark - Reload
+
+- (void)reloadItems {
+    for (UIButton *button in _views) {
+        [button removeTarget:self action:@selector(didTapMenuButton:) forControlEvents:UIControlEventTouchUpInside];
+        [button removeFromSuperview];
+    }
+
+    [_views removeAllObjects];
+
+    for (RMPScrollingMenuBarItem *item in _items) {
+        RMPScrollingMenuBarButton *view = item.button;
+
+        [view addTarget:self action:@selector(didTapMenuButton:) forControlEvents:UIControlEventTouchUpInside];
+        [_scrollView addSubview:view];
+        [_views addObject:view];
+    }
+
+    [self layoutIfNeeded];
+}
+
 - (void)setItems:(NSArray *)items {
     [self setItems:items animated:NO];
 }
@@ -144,92 +157,62 @@
     _selectedItem = nil;
     _items = [items copy];
 
-    // Clear all of menu items.
-    for (UIView *view in _scrollView.subviews) {
-        if ([view isKindOfClass:[RMPScrollingMenuBarButton class]]) {
-            [view removeFromSuperview];
-        }
-    }
-
-    if (_items.count == 0) {
-        return;
-    }
-
-    if (_style == RMPScrollingMenuBarStyleNormal) {
-        [self setupMenuBarButtonsForNormalStyle:animated];
-    }
+    [self reloadItems];
 }
 
-- (void)setupMenuBarButtonsForNormalStyle:(BOOL)animated {
-    CGRect f;
+- (void)layoutItemsViews {
+    __block CGFloat offset = _itemInsets.left;
+    [_views enumerateObjectsUsingBlock:^(UIButton *view, NSUInteger idx, BOOL *_) {
+        RMPScrollingMenuBarItem *item = _items[idx];
+        CGRect frame = CGRectMake(
+            offset,
+            _itemInsets.top,
+            item.width,
+            _scrollView.bounds.size.height - _itemInsets.top + _itemInsets.bottom
+        );
+        view.frame = frame;
+        offset += frame.size.width + _itemInsets.right + _itemInsets.left;
+    }];
 
-    _scrollView.pagingEnabled = NO;
-    _scrollView.decelerationRate = UIScrollViewDecelerationRateNormal;
-    _scrollView.clipsToBounds = YES;
-
-    // Set up button of menu items.
-    CGFloat offset = _itemInsets.left;
-    for (RMPScrollingMenuBarItem *item in _items) {
-        RMPScrollingMenuBarButton *view = [item button];
-        if (view) {
-            f = CGRectMake(offset, _itemInsets.top, item.width,
-                _scrollView.bounds.size.height - _itemInsets.top + _itemInsets.bottom);
-            offset += f.size.width + _itemInsets.right + _itemInsets.left;
-            view.frame = f;
-            view.alpha = 0.0;
-            [_scrollView addSubview:view];
-
-            [view addTarget:self action:@selector(didTapMenuButton:) forControlEvents:UIControlEventTouchUpInside];
-        }
-    }
     CGFloat contentWidth = offset - _itemInsets.left;
     if (contentWidth < _scrollView.bounds.size.width) {
-        // Align items to center if number of items is less.
-        offset = (_scrollView.bounds.size.width - contentWidth) * 0.5;
+        CGFloat delta = _scrollView.bounds.size.width - contentWidth;
+        CGFloat space = floorf(delta / _views.count);
+
+        [_views enumerateObjectsUsingBlock:^(UIButton *view, NSUInteger idx, BOOL *stop) {
+            CGRect frame = CGRectOffset(view.frame, idx * space, 0.f);
+            view.frame = frame;
+        }];
+
         contentWidth = _scrollView.bounds.size.width;
-        for (UIView *view in _scrollView.subviews) {
-            if ([view isKindOfClass:[RMPScrollingMenuBarButton class]]) {
-                f = view.frame;
-                f.origin.x += offset;
-                view.frame = f;
-            }
-        }
-
     }
+
     _scrollView.contentSize = CGSizeMake(contentWidth, _scrollView.bounds.size.height);
-
-    if (!animated) {
-        // Without Animate.
-        for (UIView *view in _scrollView.subviews) {
-            if ([view isKindOfClass:[RMPScrollingMenuBarButton class]]) {
-                view.alpha = 1.0;
-            }
-        }
-    } else {
-        // With Animate.
-        int i = 0;
-        for (UIView *view in _scrollView.subviews) {
-            if ([view isKindOfClass:[RMPScrollingMenuBarButton class]]) {
-                [self animateButton:view atIndex:i];
-                i++;
-            }
-        }
-    }
-
-    if (!_selectedItem && _items.count > 0) {
-        [self setSelectedItem:_items[0]];
-    }
 }
 
-- (void)animateButton:(UIView *)view atIndex:(NSInteger)index {
-    view.transform = CGAffineTransformMakeScale(1.4, 1.4);
-    [UIView animateWithDuration:0.24 delay:0.06 + 0.10 * index
-                        options:UIViewAnimationOptionCurveEaseOut
-                     animations:^{
-                         view.alpha = 1.0;
-                         view.transform = CGAffineTransformMakeScale(1.0, 1.0);
-                     } completion:^(BOOL finished) {;
-        }];
+- (void)layoutSubviews {
+    [super layoutSubviews];
+
+    _scrollView.frame = self.bounds;
+    _scrollView.contentInset = UIEdgeInsetsZero;
+
+    CGFloat lineWidth = 1.0f / [[UIScreen mainScreen] scale];
+    _border.frame = CGRectMake(0, self.bounds.size.height - lineWidth, self.bounds.size.width, lineWidth);
+
+    CGRect indicatorFrame = _indicatorView.frame;
+    indicatorFrame.origin.y = self.bounds.size.height - _indicatorHeight;
+    indicatorFrame.size.height = _indicatorHeight;
+    _indicatorView.frame = indicatorFrame;
+
+    [self layoutItemsViews];
+}
+
+- (void)setFrame:(CGRect)frame {
+    [super setFrame:frame];
+
+    CGSize contentSize = _scrollView.contentSize;
+    contentSize.height = CGRectGetHeight(frame);
+    _scrollView.contentSize = contentSize;
 }
 
 - (CGFloat)scrollOffsetX {

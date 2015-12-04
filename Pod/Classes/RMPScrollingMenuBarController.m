@@ -40,6 +40,7 @@ const CGFloat RMPMenuBarDefaultBarHeight = 64.f;
     self = [super initWithCoder:aDecoder];
     if (self) {
         _barHeight = RMPMenuBarDefaultBarHeight;
+//        self.edgesForExtendedLayout = UIRectEdgeLeft | UIRectEdgeRight | UIRectEdgeBottom;
     }
 
     return self;
@@ -89,8 +90,8 @@ const CGFloat RMPMenuBarDefaultBarHeight = 64.f;
                                                                       metrics:nil
                                                                         views:views]];
 
-    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.view
-                                                          attribute:NSLayoutAttributeTop
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.topLayoutGuide
+                                                          attribute:NSLayoutAttributeBottom
                                                           relatedBy:NSLayoutRelationEqual
                                                              toItem:self.menuBar
                                                           attribute:NSLayoutAttributeTop
@@ -111,7 +112,7 @@ const CGFloat RMPMenuBarDefaultBarHeight = 64.f;
                                                                       options:NSLayoutFormatDirectionLeadingToTrailing
                                                                       metrics:nil
                                                                         views:views]];
-    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[view][container]|"
+    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[view][container]|"
                                                                       options:NSLayoutFormatDirectionLeadingToTrailing
                                                                       metrics:nil
                                                                         views:views]];
@@ -224,21 +225,6 @@ const CGFloat RMPMenuBarDefaultBarHeight = 64.f;
     RMPMenuBarControllerDirection direction = RMPScrollingMenuBarControllerDirectionLeft;
     if (toIndex > fromIndex) {
         direction = RMPScrollingMenuBarControllerDirectionRight;
-    }
-
-    if (self.menuBar.style == RMPScrollingMenuBarStyleInfinitePaging) {
-        if (toIndex == 0 && fromIndex == _viewControllers.count - 1) {
-            direction = RMPScrollingMenuBarControllerDirectionRight;
-        } else if (toIndex == _viewControllers.count - 1 && fromIndex == 0) {
-            direction = RMPScrollingMenuBarControllerDirectionLeft;
-        }
-
-        if (_menuBarDirection == RMPScrollingMenuBarDirectionRight) {
-            direction = RMPScrollingMenuBarControllerDirectionRight;
-        } else if (_menuBarDirection == RMPScrollingMenuBarDirectionLeft) {
-            direction = RMPScrollingMenuBarControllerDirectionLeft;
-        }
-        _menuBarDirection = RMPScrollingMenuBarDirectionNone;
     }
 
     id <UIViewControllerAnimatedTransitioning> animator = nil;

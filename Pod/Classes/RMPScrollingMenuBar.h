@@ -69,6 +69,7 @@ typedef NS_ENUM(NSInteger, RMPScrollingMenuBarDirection) {
  */
 @property (nonatomic, assign) BOOL showsIndicator;
 
+
 /** Color of indicator which be displayed under selected menu item.
  */
 @property (nonatomic, strong) UIColor *indicatorColor;
