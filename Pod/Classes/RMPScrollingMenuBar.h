@@ -47,7 +47,7 @@ typedef NS_ENUM(NSUInteger, RMPScrollingMenuBarStyle) {
 
 /** Array of menu items.
  */
-@property (nonatomic, copy) NSArray *items;
+@property (nonatomic, copy) NSArray <RMPScrollingMenuBarItem *>*items;
 
 /** Selected menu item.
  */

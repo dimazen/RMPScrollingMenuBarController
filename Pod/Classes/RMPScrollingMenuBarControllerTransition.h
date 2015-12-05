@@ -22,14 +22,16 @@
 #import "RMPScrollingMenuBarController.h"
 #import "RMPScrollingMenuBarControllerAnimator.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 typedef void(^RMPScrollingMenuBarControllerTransitionContextCompletionBlock)(BOOL didComplete);
 typedef void(^RMPScrollingMenuBarControllerInteractionControllerCancelCompletionBlock)();
 
 /** Transition Delegate Object for view transitioning of Scrolling menu bar controller.
  */
-@interface RMPScrollingMenuBarControllerTransition : NSObject <RMPScrollingMenuBarControllerTransitionDelegate>
+@interface RMPScrollingMenuBarControllerTransition: NSObject <RMPScrollingMenuBarControllerTransitionDelegate>
 
-- (instancetype)initWithMenuBarController:(RMPScrollingMenuBarController*)controller;
+- (instancetype)initWithMenuBarController:(RMPScrollingMenuBarController *)controller;
 
 @end
 
@@ -37,38 +39,37 @@ typedef void(^RMPScrollingMenuBarControllerInteractionControllerCancelCompletion
  */
 @interface RMPScrollingMenuBarControllerInteractionController : NSObject <UIViewControllerInteractiveTransitioning>
 
-@property(readonly) CGFloat percentComplete;
-
+@property (readonly) CGFloat percentComplete;
 
 - (instancetype)initWithAnimator:(id<UIViewControllerAnimatedTransitioning>)animator;
 - (void)startInteractiveTransition:(id<UIViewControllerContextTransitioning>)context;
 - (void)updateInteractiveTransition:(CGFloat)percentComplete;
 - (void)cancelInteractiveTransitionWithCompletion:(RMPScrollingMenuBarControllerInteractionControllerCancelCompletionBlock)completion;
 - (void)finishInteractiveTransition;
-
 - (UIViewAnimationCurve)completionCurve;
 - (CGFloat)completionSpeed;
+
 @end
 
 /** TransitionContext class for view transitioning of scrolling menu bar controller.
  */
 @interface RMPScrollingMenuBarControllerTransitionContext : NSObject <UIViewControllerContextTransitioning>
 
-@property (nonatomic, readonly)UIView* containerView;
-@property (nonatomic, readonly, getter=isAnimated)BOOL animated;
-@property (nonatomic, readonly, getter=isInteractive)BOOL interactive;
-@property (nonatomic, readonly)UIModalPresentationStyle presentationStyle;
-@property (nonatomic, readonly)RMPMenuBarControllerDirection direction;
+@property (nonatomic, readonly) UIView *containerView;
+@property (nonatomic, readonly, getter=isAnimated) BOOL animated;
+@property (nonatomic, readonly, getter=isInteractive) BOOL interactive;
+@property (nonatomic, readonly) UIModalPresentationStyle presentationStyle;
+@property (nonatomic, readonly) RMPMenuBarControllerDirection direction;
 
-- (instancetype)initWithMenuBarController:(RMPScrollingMenuBarController*)menuBarControlller
-                       fromViewController:(UIViewController*)fromVC
-                         toViewController:(UIViewController*)toVC
+- (instancetype)initWithMenuBarController:(RMPScrollingMenuBarController *)menuBarControlller
+                       fromViewController:(UIViewController *)fromVC
+                         toViewController:(UIViewController *)toVC
                                 direction:(RMPMenuBarControllerDirection)direction
-                                 animator:(RMPScrollingMenuBarControllerAnimator*)animator
+                                 animator:(RMPScrollingMenuBarControllerAnimator *)animator
                     interactionController:(id<UIViewControllerInteractiveTransitioning>)interactionController
                                completion:(RMPScrollingMenuBarControllerTransitionContextCompletionBlock)completion;
 
-- (UIViewController *)viewControllerForKey:(NSString *)key;
+- (nullable __kindof UIViewController *)viewControllerForKey:(NSString *)key;
 - (void)updateInteractiveTransition:(CGFloat)percentComplete;
 - (void)finishInteractiveTransition;
 - (void)cancelInteractiveTransition;
@@ -76,4 +77,7 @@ typedef void(^RMPScrollingMenuBarControllerInteractionControllerCancelCompletion
 - (void)completeTransition:(BOOL)didComplete;
 - (CGRect)initialFrameForViewController:(UIViewController *)vc;
 - (CGRect)finalFrameForViewController:(UIViewController *)vc;
+
 @end
+
+NS_ASSUME_NONNULL_END

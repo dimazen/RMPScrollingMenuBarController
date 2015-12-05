@@ -57,13 +57,13 @@ typedef NS_ENUM(NSInteger, RMPMenuBarControllerDirection) {
 @protocol RMPScrollingMenuBarControllerTransitionDelegate <NSObject>
 
 @optional
-- (id <UIViewControllerAnimatedTransitioning>)menuBarController:(RMPScrollingMenuBarController *)menuBarController
-                                animationControllerForDirection:(RMPMenuBarControllerDirection)direction
-                                             fromViewController:(UIViewController *)fromViewController
-                                               toViewController:(UIViewController *)toViewController;
+- (id<UIViewControllerAnimatedTransitioning>)menuBarController:(RMPScrollingMenuBarController *)menuBarController
+                               animationControllerForDirection:(RMPMenuBarControllerDirection)direction
+                                            fromViewController:(UIViewController *)fromViewController
+                                              toViewController:(UIViewController *)toViewController;
 
-- (id <UIViewControllerInteractiveTransitioning>)menuBarController:(RMPScrollingMenuBarController *)menuBarController
-                       interactionControllerForAnimationController:(id <UIViewControllerAnimatedTransitioning>)animationController;
+- (id<UIViewControllerInteractiveTransitioning>)menuBarController:(RMPScrollingMenuBarController *)menuBarController
+                      interactionControllerForAnimationController:(id <UIViewControllerAnimatedTransitioning>)animationController;
 @end
 
 /** Container type ViewController class of with a scrollable menu bar
@@ -82,7 +82,7 @@ typedef NS_ENUM(NSInteger, RMPMenuBarControllerDirection) {
 
 /** NSArray of child view controllers.
  */
-@property (nonatomic, retain) NSArray *viewControllers;
+@property (nonatomic, retain) NSArray <UIViewController *>*viewControllers;
 
 /** Selected view controller.
  */
@@ -98,12 +98,11 @@ typedef NS_ENUM(NSInteger, RMPMenuBarControllerDirection) {
 
 /** Transition Delegate object
  */
-@property (nonatomic, weak, nullable) id <RMPScrollingMenuBarControllerTransitionDelegate> transitionDelegate;
+@property (nonatomic, weak, nullable) id<RMPScrollingMenuBarControllerTransitionDelegate> transitionDelegate;
 
 /** Setter of view controllers.
  */
-- (void)setViewControllers:(NSArray *)viewControllers animated:(BOOL)animated;
-
+- (void)setViewControllers:(NSArray <UIViewController *>*)viewControllers animated:(BOOL)animated;
 
 @end
 
