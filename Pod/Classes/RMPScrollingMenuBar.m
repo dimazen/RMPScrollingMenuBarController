@@ -96,6 +96,7 @@
     _indicatorHeight = 2;
     _itemInterspace = 20.f;
     _indicatorColor = [UIColor colorWithRed:0.988 green:0.224 blue:0.129 alpha:1.0];
+    _selectedIndex = NSNotFound;
 
     _itemTextAttributes = [[NSMutableDictionary alloc] init];
 
@@ -164,11 +165,13 @@
 }
 
 - (void)setItems:(NSArray *)items animated:(BOOL)animated {
-    _selectedIndex = 0;
     _items = [items copy];
 
     [self reloadItems];
+    [self setSelectedIndex:items.count > 0 ? 0 : NSNotFound animated:animated forced:YES];
 }
+
+#pragma mark - Layout
 
 - (void)layoutItemsViews {
     const CGFloat contentHeight = _scrollView.bounds.size.height;
@@ -201,77 +204,6 @@
     }
 
     _scrollView.contentSize = CGSizeMake(contentWidth, contentHeight);
-}
-
-- (void)layoutSubviews {
-    [super layoutSubviews];
-
-    _scrollView.frame = self.bounds;
-    _scrollView.contentInset = UIEdgeInsetsZero;
-
-    CGFloat lineWidth = 1.0f / [[UIScreen mainScreen] scale];
-    _border.frame = CGRectMake(0, self.bounds.size.height - lineWidth, self.bounds.size.width, lineWidth);
-
-    CGRect indicatorFrame = _indicatorView.frame;
-    indicatorFrame.origin.y = self.bounds.size.height - _indicatorHeight;
-    indicatorFrame.size.height = _indicatorHeight;
-    _indicatorView.frame = indicatorFrame;
-
-    [self layoutItemsViews];
-
-    if (self.items.count > 0) {
-        [self layoutIndexSelection:self.selectedIndex animated:NO];
-    }
-}
-
-- (CGFloat)scrollOffsetX {
-    return _scrollView.contentOffset.x;
-}
-
-- (void)scrollByRatio:(CGFloat)ratio from:(CGFloat)from {
-    if (_style == RMPScrollingMenuBarStyleNormal) {
-        NSInteger index = self.selectedIndex;
-        NSInteger ignoreCount = (NSInteger)(_scrollView.frame.size.width * 0.5 / (_scrollView.contentSize.width / _items.count));
-        for (NSInteger i = 0; i < ignoreCount; i++) {
-            if (index == i) {
-                return;
-            } else if (index == _items.count - 1 - i) {
-                return;
-            }
-        }
-
-        if (index == ignoreCount && ratio < 0.0) {
-            return;
-        } else if (index == _items.count - 1 - ignoreCount && ratio > 0.0) {
-            return;
-        }
-    }
-
-    _scrollView.contentOffset = CGPointMake(from + _scrollView.contentSize.width / _items.count * ratio, 0);
-}
-
-#pragma mark - Selection
-
-- (RMPScrollingMenuBarItem *)selectedItem {
-    if (self.items.count > 0) {
-        return self.items[self.selectedIndex];
-    }
-
-    return nil;
-}
-
-- (void)setSelectedIndex:(NSInteger)selectedIndex animated:(BOOL)animated {
-    if (_selectedIndex == selectedIndex) { return; }
-
-    [self deselectViewAtIndex:_selectedIndex];
-    _selectedIndex = selectedIndex;
-    [self selectViewAtIndex:_selectedIndex];
-
-    [self layoutIndexSelection:_selectedIndex animated:animated];
-}
-
-- (void)setSelectedIndex:(NSInteger)selectedIndex {
-    [self setSelectedIndex:selectedIndex animated:YES];
 }
 
 - (void)layoutIndexSelection:(NSInteger)index animated:(BOOL)animated {
@@ -326,6 +258,86 @@
             adjust();
         }
     }
+}
+
+- (void)layoutSubviews {
+    [super layoutSubviews];
+
+    _scrollView.frame = self.bounds;
+    _scrollView.contentInset = UIEdgeInsetsZero;
+
+    CGFloat lineWidth = 1.0f / [[UIScreen mainScreen] scale];
+    _border.frame = CGRectMake(0, self.bounds.size.height - lineWidth, self.bounds.size.width, lineWidth);
+
+    CGRect indicatorFrame = _indicatorView.frame;
+    indicatorFrame.origin.y = self.bounds.size.height - _indicatorHeight;
+    indicatorFrame.size.height = _indicatorHeight;
+    _indicatorView.frame = indicatorFrame;
+
+    [self layoutItemsViews];
+
+    if (self.selectedIndex != NSNotFound && self.items.count > 0) {
+        [self layoutIndexSelection:self.selectedIndex animated:NO];
+    }
+}
+
+- (CGFloat)scrollOffsetX {
+    return _scrollView.contentOffset.x;
+}
+
+- (void)scrollByRatio:(CGFloat)ratio from:(CGFloat)from {
+    if (_style == RMPScrollingMenuBarStyleNormal) {
+        NSInteger index = self.selectedIndex;
+        NSInteger ignoreCount = (NSInteger)(_scrollView.frame.size.width * 0.5 / (_scrollView.contentSize.width / _items.count));
+        for (NSInteger i = 0; i < ignoreCount; i++) {
+            if (index == i) {
+                return;
+            } else if (index == _items.count - 1 - i) {
+                return;
+            }
+        }
+
+        if (index == ignoreCount && ratio < 0.0) {
+            return;
+        } else if (index == _items.count - 1 - ignoreCount && ratio > 0.0) {
+            return;
+        }
+    }
+
+    _scrollView.contentOffset = CGPointMake(from + _scrollView.contentSize.width / _items.count * ratio, 0);
+}
+
+#pragma mark - Selection
+
+- (RMPScrollingMenuBarItem *)selectedItem {
+    if (self.items.count > 0) {
+        return self.items[self.selectedIndex];
+    }
+
+    return nil;
+}
+
+- (void)setSelectedIndex:(NSInteger)selectedIndex animated:(BOOL)animated forced:(BOOL)forced {
+    if (!forced && _selectedIndex == selectedIndex) { return; }
+
+    if (_selectedIndex != NSNotFound) {
+        [self deselectViewAtIndex:_selectedIndex];
+    }
+
+    _selectedIndex = selectedIndex;
+
+    if (_selectedIndex != NSNotFound) {
+        [self selectViewAtIndex:_selectedIndex];
+        [self layoutIndexSelection:_selectedIndex animated:animated];
+    }
+}
+
+- (void)setSelectedIndex:(NSInteger)selectedIndex animated:(BOOL)animated {
+    [self setSelectedIndex:selectedIndex animated:animated forced:NO];
+}
+
+- (void)setSelectedIndex:(NSInteger)selectedIndex {
+    [self setSelectedIndex:selectedIndex animated:YES];
 }
 
 - (void)selectViewAtIndex:(NSInteger)index {
