@@ -388,13 +388,10 @@
 #pragma mark - Appearance
 
 - (void)applyAppearanceToView:(RMPScrollingMenuBarButton *)view {
-    view.backgroundColor = [UIColor blackColor];
-    view.titleLabel.backgroundColor = [UIColor yellowColor];
-
     view.titleLabel.font = self.itemTextFont ?: [UIFont systemFontOfSize:16.f];
     [view setTitleColor:[self safeItemTextColorForState:UIControlStateNormal] forState:UIControlStateNormal];
     [view setTitleColor:[self safeItemTextColorForState:UIControlStateSelected] forState:UIControlStateSelected];
-    [view setTitleEdgeInsets:self.itemTextEdgeInsets];
+    [view setContentEdgeInsets:self.itemTextEdgeInsets];
 }
 
 - (void)setNeedsUpdateViewsAppearance {

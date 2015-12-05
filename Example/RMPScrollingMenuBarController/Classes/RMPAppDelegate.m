@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 #import "RMPAppDelegate.h"
-#import "RMPScrollingMenuBarController.h"
+#import <RMPScrollingMenuBarController/RMPScrollingMenuBarController.h>
 #import "RMPPageViewController.h"
 
 @interface RMPAppDelegate ()<RMPScrollingMenuBarControllerDelegate>
@@ -75,6 +75,8 @@
     // Customize appearance of menu bar.
     menuController.view.backgroundColor = [UIColor whiteColor];
     menuController.menuBar.indicatorColor = [UIColor blueColor];
+    menuController.menuBar.showsSeparatorLine = NO;
+    menuController.menuBar.itemTextEdgeInsets = UIEdgeInsetsMake(0.f, 4.f, 0.f, 4.f);
     //menuController.menuBar.style = RMPScrollingMenuBarStyleInfinitePaging;
     //menuController.menuBar.showsIndicator = NO;
     //menuController.menuBar.showsSeparatorLine = NO;
