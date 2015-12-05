@@ -438,7 +438,7 @@
 
 #pragma mark - Selection Handling
 
-- (void)didTapMenuButton:(UIButton *)sender {
+- (void)didTapMenuButton:(RMPScrollingMenuBarButton *)sender {
     NSInteger index = [_views indexOfObject:sender];
     if (index != NSNotFound) {
         [self setSelectedIndex:index animated:YES];

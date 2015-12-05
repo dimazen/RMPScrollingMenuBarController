@@ -32,7 +32,6 @@ const CGFloat RMPMenuBarDefaultBarHeight = 64.f;
 @implementation RMPScrollingMenuBarController {
     NSArray *_items;
     RMPScrollingMenuBarControllerTransition *_transition;
-    RMPScrollingMenuBarDirection _menuBarDirection;
 }
 
 - (nullable instancetype)initWithCoder:(NSCoder *)aDecoder {
@@ -303,10 +302,8 @@ const CGFloat RMPMenuBarDefaultBarHeight = 64.f;
 
 #pragma mark - RMPScrollingMenuBarDelegate
 
-- (void)menuBar:(RMPScrollingMenuBar *)menuBar didSelectItemAtIndex:(NSInteger)index direction:(RMPScrollingMenuBarDirection)direction {
+- (void)menuBar:(RMPScrollingMenuBar *)menuBar didSelectItemAtIndex:(NSInteger)index {
     if (index != NSNotFound && index != self.selectedIndex) {
-        // Switch view controller.
-        _menuBarDirection = direction;
         [self setSelectedIndex:index];
     }
 }
