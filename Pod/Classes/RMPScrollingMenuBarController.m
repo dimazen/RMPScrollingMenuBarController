@@ -63,7 +63,7 @@ const CGFloat RMPMenuBarDefaultBarHeight = 64.f;
 
     _containerView = [[UIView alloc] initWithFrame:self.view.bounds];
     self.containerView.translatesAutoresizingMaskIntoConstraints = NO;
-    self.containerView.backgroundColor = [UIColor yellowColor];
+    self.containerView.backgroundColor = [UIColor whiteColor];
     [self.view insertSubview:self.containerView belowSubview:self.menuBar];
 
     [self instantiateConstraints];
