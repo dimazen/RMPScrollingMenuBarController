@@ -94,7 +94,7 @@
     _showsIndicator = YES;
     _showsSeparatorLine = YES;
     _indicatorHeight = 2;
-    _itemInsets = UIEdgeInsetsMake(2.f, 10.f, 0, 10.f);
+    _itemInterspace = 20.f;
     _indicatorColor = [UIColor colorWithRed:0.988 green:0.224 blue:0.129 alpha:1.0];
 
     _itemTextAttributes = [[NSMutableDictionary alloc] init];
@@ -150,7 +150,7 @@
     for (RMPScrollingMenuBarItem *item in _items) {
         RMPScrollingMenuBarButton *view = [self newViewForItem:item];
 
-        [_scrollView addSubview:view];
+        [_scrollView insertSubview:view belowSubview:_indicatorView];
         [_views addObject:view];
     }
 
@@ -171,21 +171,23 @@
 }
 
 - (void)layoutItemsViews {
-    const CGFloat viewHeight = _scrollView.bounds.size.height - _itemInsets.top + _itemInsets.bottom;
-    __block CGFloat offset = _itemInsets.left;
+    const CGFloat contentHeight = _scrollView.bounds.size.height;
+    const CGFloat itemInterspaceHalf = self.itemInterspace / 2.f;
+    __block CGFloat offset = itemInterspaceHalf;
+
     [_views enumerateObjectsUsingBlock:^(RMPScrollingMenuBarButton *view, NSUInteger idx, BOOL *_) {
         RMPScrollingMenuBarItem *item = _items[idx];
         CGRect frame = CGRectMake(
             offset,
-            _itemInsets.top,
-            [self contentWidthForItem:item view:view fittingHeight:viewHeight],
-            viewHeight
+            0.f,
+            [self contentWidthForItem:item view:view fittingHeight:contentHeight],
+            contentHeight
         );
         view.frame = frame;
-        offset += frame.size.width + _itemInsets.right + _itemInsets.left;
+        offset += frame.size.width + self.itemInterspace;
     }];
 
-    CGFloat contentWidth = offset - _itemInsets.left;
+    CGFloat contentWidth = offset - itemInterspaceHalf;
     if (contentWidth < _scrollView.bounds.size.width) {
         CGFloat delta = _scrollView.bounds.size.width - contentWidth;
         CGFloat space = floorf(delta / (_views.count + 1));
@@ -198,7 +200,6 @@
         contentWidth = _scrollView.bounds.size.width;
     }
 
-    const CGFloat contentHeight = _scrollView.bounds.size.height;
     _scrollView.contentSize = CGSizeMake(contentWidth, contentHeight);
 }
 
@@ -280,11 +281,11 @@
     CGPoint newPosition = CGPointZero;
     if (_style == RMPScrollingMenuBarStyleNormal) {
         if (view.center.x > _scrollView.bounds.size.width * 0.5
-            && (NSInteger) (_scrollView.contentSize.width - view.center.x) >= (NSInteger) (_scrollView.bounds.size.width * 0.5)) {
+            && (NSInteger) (_scrollView.contentSize.width - view.center.x) >= (NSInteger)(_scrollView.bounds.size.width * 0.5)) {
             offset = CGPointMake(view.center.x - _scrollView.frame.size.width * 0.5, 0);
         } else if (view.center.x < _scrollView.bounds.size.width * 0.5) {
             offset = CGPointMake(0, 0);
-        } else if ((NSInteger) (_scrollView.contentSize.width - view.center.x) < (NSInteger) (_scrollView.bounds.size.width * 0.5)) {
+        } else if ((NSInteger) (_scrollView.contentSize.width - view.center.x) < (NSInteger)(_scrollView.bounds.size.width * 0.5)) {
             offset = CGPointMake(_scrollView.contentSize.width - _scrollView.bounds.size.width, 0);
         }
         [_scrollView setContentOffset:offset animated:animated];
@@ -387,6 +388,9 @@
 #pragma mark - Appearance
 
 - (void)applyAppearanceToView:(RMPScrollingMenuBarButton *)view {
+    view.backgroundColor = [UIColor blackColor];
+    view.titleLabel.backgroundColor = [UIColor yellowColor];
+
     view.titleLabel.font = self.itemTextFont ?: [UIFont systemFontOfSize:16.f];
     [view setTitleColor:[self safeItemTextColorForState:UIControlStateNormal] forState:UIControlStateNormal];
     [view setTitleColor:[self safeItemTextColorForState:UIControlStateSelected] forState:UIControlStateSelected];
@@ -410,6 +414,7 @@
     RMPScrollingMenuBarButton *view = [[RMPScrollingMenuBarButton alloc] init];
 
     [self applyAppearanceToView:view];
+
     [view setTitle:item.title forState:UIControlStateNormal];
     view.exclusiveTouch = NO;
 
@@ -438,8 +443,8 @@
     if (index != NSNotFound) {
         [self setSelectedIndex:index animated:YES];
 
-        if ([_delegate respondsToSelector:@selector(menuBar:didSelectItem:direction:)]) {
-            [_delegate menuBar:self didSelectItem:self.selectedItem direction:RMPScrollingMenuBarDirectionNone];
+        if ([_delegate respondsToSelector:@selector(menuBar:didSelectItemAtIndex:)]) {
+            [_delegate menuBar:self didSelectItemAtIndex:index];
         }
     }
 }

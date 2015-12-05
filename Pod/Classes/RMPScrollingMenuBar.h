@@ -27,29 +27,19 @@ typedef NS_ENUM(NSUInteger, RMPScrollingMenuBarStyle) {
     RMPScrollingMenuBarStyleNormal
 };
 
-typedef NS_ENUM(NSInteger, RMPScrollingMenuBarDirection) {
-    RMPScrollingMenuBarDirectionNone,
-    RMPScrollingMenuBarDirectionLeft,
-    RMPScrollingMenuBarDirectionRight,
-};
-
 @class RMPScrollingMenuBar;
 
 /** ScrollingMenuBar's delegate protocol
  */
 @protocol RMPScrollingMenuBarDelegate <NSObject>
 
-- (void)menuBar:(RMPScrollingMenuBar *)menuBar didSelectItem:(RMPScrollingMenuBarItem *)item direction:(RMPScrollingMenuBarDirection)direction;
+- (void)menuBar:(RMPScrollingMenuBar *)menuBar didSelectItemAtIndex:(NSInteger)index;
 
 @end
 
 /** View Class of ScrollingMenuBar
  */
 @interface RMPScrollingMenuBar : UIView
-
-/** Insets of menu items on menu bar. Use for adjusting spaces between menu items.
- */
-@property (nonatomic, assign) UIEdgeInsets itemInsets;
 
 /** Delegate object
  */
@@ -94,6 +84,7 @@ typedef NS_ENUM(NSInteger, RMPScrollingMenuBarDirection) {
  */
 - (void)scrollByRatio:(CGFloat)ratio from:(CGFloat)from;
 
+@property (nonatomic) CGFloat itemInterspace;
 @property (nonatomic) UIEdgeInsets itemTextEdgeInsets;
 @property (nonatomic) UIFont *itemTextFont;
 - (void)setItemTextColor:(UIColor *)color forState:(UIControlState)state;

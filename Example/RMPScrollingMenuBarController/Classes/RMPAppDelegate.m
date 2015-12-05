@@ -103,14 +103,6 @@
     RMPScrollingMenuBarItem* item = [[RMPScrollingMenuBarItem alloc] init];
     item.title = [NSString stringWithFormat:@"Title %02ld", (long)(index+1)];
 
-    // Customize appearance of menu bar item.
-    UIButton* button = item.button;
-    [button setTitleColor:[UIColor lightGrayColor]
-                 forState:UIControlStateNormal];
-    [button setTitleColor:[UIColor grayColor]
-                 forState:UIControlStateDisabled];
-    [button setTitleColor:[UIColor blueColor]
-                 forState:UIControlStateSelected];
     return item;
 }
 
