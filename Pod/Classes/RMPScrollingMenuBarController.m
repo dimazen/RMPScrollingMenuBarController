@@ -34,6 +34,9 @@ const CGFloat RMPMenuBarDefaultBarHeight = 64.f;
     RMPScrollingMenuBarControllerTransition *_transition;
 }
 
+@synthesize menuBar = _menuBar;
+@synthesize containerView = _containerView;
+
 - (nullable instancetype)initWithCoder:(NSCoder *)aDecoder {
     self = [super initWithCoder:aDecoder];
     if (self) {
@@ -52,18 +55,13 @@ const CGFloat RMPMenuBarDefaultBarHeight = 64.f;
     return self;
 }
 
+#pragma mark - Views
+
+
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-    _menuBar = [[RMPScrollingMenuBar alloc] initWithFrame:self.view.bounds];
-    self.menuBar.translatesAutoresizingMaskIntoConstraints = NO;
-    self.menuBar.backgroundColor = [UIColor whiteColor];
-    self.menuBar.delegate = self;
     [self.view addSubview:self.menuBar];
-
-    _containerView = [[UIView alloc] initWithFrame:self.view.bounds];
-    self.containerView.translatesAutoresizingMaskIntoConstraints = NO;
-    self.containerView.backgroundColor = [UIColor whiteColor];
     [self.view insertSubview:self.containerView belowSubview:self.menuBar];
 
     [self instantiateConstraints];
@@ -76,6 +74,28 @@ const CGFloat RMPMenuBarDefaultBarHeight = 64.f;
         [self updateMenuBarWithViewControllers:_viewControllers animated:NO];
         [self setSelectedViewController:_viewControllers[0]];
     }
+}
+
+// to give ability to configure menu and container but prevent view loading.
+- (RMPScrollingMenuBar *)menuBar {
+    if (_menuBar == nil) {
+        _menuBar = [[RMPScrollingMenuBar alloc] initWithFrame:[UIScreen mainScreen].bounds];
+        _menuBar.translatesAutoresizingMaskIntoConstraints = NO;
+        _menuBar.backgroundColor = [UIColor whiteColor];
+        _menuBar.delegate = self;
+    }
+
+    return _menuBar;
+}
+
+- (UIView *)containerView {
+    if (_containerView == nil) {
+        _containerView = [[UIView alloc] initWithFrame:[UIScreen mainScreen].bounds];
+        self.containerView.translatesAutoresizingMaskIntoConstraints = NO;
+        self.containerView.backgroundColor = [UIColor whiteColor];
+    }
+
+    return _containerView;
 }
 
 #pragma mark - Layout
