@@ -250,10 +250,10 @@ const CGSize RMPScrollingMenuIndicatorSizeAutomatic = {0.f, 0.f};
         }
 
         CGRect frame = CGRectMake(
-            offset,
-            _scrollView.bounds.size.height - actualHeight,
-            actualWidth,
-            actualHeight
+            offset + _indicatorInsets.right,
+            _scrollView.bounds.size.height - actualHeight + _indicatorInsets.top,
+            actualWidth - _indicatorInsets.left - _indicatorInsets.right,
+            actualHeight - _indicatorInsets.top - _indicatorInsets.bottom
         );
         _indicatorView.frame = frame;
     };
