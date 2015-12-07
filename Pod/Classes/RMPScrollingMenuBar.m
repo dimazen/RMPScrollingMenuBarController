@@ -20,7 +20,7 @@
 
 #import "RMPScrollingMenuBar.h"
 
-const CGFloat RMPScrollingMenuIndicatorWidthAutomatic = 0.f;
+const CGSize RMPScrollingMenuIndicatorSizeAutomatic = {0.f, 0.f};
 
 @interface RMPScrollingMenuBarScrollView : UIScrollView
 
@@ -57,9 +57,6 @@ const CGFloat RMPScrollingMenuIndicatorWidthAutomatic = 0.f;
     RMPScrollingMenuBarScrollView *_scrollView;
     UIView *_indicatorView;
     UIView *_border;
-
-    CGFloat _indicatorHeight;
-
     NSMutableArray <RMPScrollingMenuBarButton *>*_views;
 }
 
@@ -95,13 +92,15 @@ const CGFloat RMPScrollingMenuIndicatorWidthAutomatic = 0.f;
 - (void)setup {
     _showsIndicator = YES;
     _showsSeparatorLine = YES;
-    _indicatorHeight = 2;
-    _itemInterspace = 20.f;
-    _indicatorColor = [UIColor colorWithRed:0.988 green:0.224 blue:0.129 alpha:1.0];
     _selectedIndex = NSNotFound;
 
-    _itemTextAttributes = [[NSMutableDictionary alloc] init];
+    _indicatorColor = [UIColor colorWithRed:0.988 green:0.224 blue:0.129 alpha:1.0];
+    _indicatorAlignment = RMPScrollingMenuIndicatorAlignmentCenter;
+    _indicatorSize = RMPScrollingMenuIndicatorSizeAutomatic;
+    _indicatorInsets = UIEdgeInsetsMake(0.f, -3.f, 0.f, -3.f);
 
+    _itemInterspace = 20.f;
+    _itemTextAttributes = [[NSMutableDictionary alloc] init];
     _defaultItemTextAttributes = @{
         @(UIControlStateNormal): [UIColor colorWithRed:0.647 green:0.631 blue:0.604 alpha:1],
         @(UIControlStateSelected): [UIColor colorWithRed:0.988 green:0.224 blue:0.129 alpha:1.000]
@@ -208,57 +207,75 @@ const CGFloat RMPScrollingMenuIndicatorWidthAutomatic = 0.f;
     _scrollView.contentSize = CGSizeMake(contentWidth, contentHeight);
 }
 
-- (void)layoutIndexSelection:(NSInteger)index animated:(BOOL)animated {
+- (void)scrollToViewAtIndex:(NSInteger)index animated:(BOOL)animated {
     UIView *view = _views[index];
     // Selected item want to be displayed to center as possible.
     CGPoint offset = CGPointZero;
-    CGPoint newPosition = CGPointZero;
-    if (_style == RMPScrollingMenuBarStyleNormal) {
-        if (view.center.x > _scrollView.bounds.size.width * 0.5
-            && (NSInteger) (_scrollView.contentSize.width - view.center.x) >= (NSInteger)(_scrollView.bounds.size.width * 0.5)) {
-            offset = CGPointMake(view.center.x - _scrollView.frame.size.width * 0.5, 0);
-        } else if (view.center.x < _scrollView.bounds.size.width * 0.5) {
-            offset = CGPointMake(0, 0);
-        } else if ((NSInteger) (_scrollView.contentSize.width - view.center.x) < (NSInteger)(_scrollView.bounds.size.width * 0.5)) {
-            offset = CGPointMake(_scrollView.contentSize.width - _scrollView.bounds.size.width, 0);
-        }
-        [_scrollView setContentOffset:offset animated:animated];
+    if (view.center.x > _scrollView.bounds.size.width * 0.5
+        && (NSInteger) (_scrollView.contentSize.width - view.center.x) >= (NSInteger)(_scrollView.bounds.size.width * 0.5)) {
+        offset = CGPointMake(view.center.x - _scrollView.frame.size.width * 0.5, 0);
+    } else if (view.center.x < _scrollView.bounds.size.width * 0.5) {
+        offset = CGPointMake(0, 0);
+    } else if ((NSInteger) (_scrollView.contentSize.width - view.center.x) < (NSInteger)(_scrollView.bounds.size.width * 0.5)) {
+        offset = CGPointMake(_scrollView.contentSize.width - _scrollView.bounds.size.width, 0);
+    }
+    [_scrollView setContentOffset:offset animated:animated];
+}
 
-        newPosition = [_scrollView convertPoint:CGPointZero fromView:view];
+- (void)moveIndicatorAtIndex:(NSInteger)index animated:(BOOL)animated {
+    UIView *view = _views[index];
+    CGFloat viewOffset = [_scrollView convertPoint:CGPointZero fromView:view].x;
+
+    void (^adjust)(void) = ^{
+        CGFloat viewWidth = view.bounds.size.width;
+        CGFloat preferredWidth = _indicatorSize.width;
+        CGFloat actualWidth = preferredWidth == RMPScrollingMenuIndicatorSizeAutomatic.width ? viewWidth : preferredWidth;
+
+        CGFloat preferredHeight = _indicatorSize.height;
+        CGFloat actualHeight = preferredHeight == RMPScrollingMenuIndicatorSizeAutomatic.height ? 2.f : preferredHeight;
+
+        CGFloat offset = 0.f;
+        switch (_indicatorAlignment) {
+        case RMPScrollingMenuIndicatorAlignmentLeft:
+            offset = viewOffset;
+            break;
+
+        case RMPScrollingMenuIndicatorAlignmentCenter:
+            offset = viewOffset + floorf((viewWidth - actualWidth) / 2.f);
+            break;
+
+        case RMPScrollingMenuIndicatorAlignmentRight:
+            offset = viewOffset + viewWidth - actualWidth;
+            break;
+        }
+
+        CGRect frame = CGRectMake(
+            offset,
+            _scrollView.bounds.size.height - actualHeight,
+            actualWidth,
+            actualHeight
+        );
+        _indicatorView.frame = frame;
+    };
+
+    NSTimeInterval duration = fabs(viewOffset - _indicatorView.frame.origin.x) / 160.0 * 0.4 * 0.8;
+    if (duration < 0.38) {
+        duration = 0.38;
+    } else if (duration > 0.6) {
+        duration = 0.6;
     }
 
-    if (_indicatorView.frame.origin.x == 0.0 && _indicatorView.frame.size.width == 0.0) {
-        CGRect f = _indicatorView.frame;
-        f.origin.x = newPosition.x - 3;
-        f.size.width = view.frame.size.width + 6;
-        _indicatorView.frame = f;
-    } else if (_style == RMPScrollingMenuBarStyleNormal) {
-        NSTimeInterval dur = fabs(newPosition.x - _indicatorView.frame.origin.x) / 160.0 * 0.4 * 0.8;
-        if (dur < 0.38) {
-            dur = 0.38;
-        } else if (dur > 0.6) {
-            dur = 0.6;
-        }
-
-        void (^adjust)(void) = ^{
-            CGRect f = _indicatorView.frame;
-            f.origin.x = newPosition.x - 3;
-            f.size.width = view.frame.size.width + 6;
-            _indicatorView.frame = f;
-        };
-
-        if (animated) {
-            UIViewAnimationOptions options = UIViewAnimationOptionCurveEaseInOut;
-            [UIView animateWithDuration:dur
-                                  delay:0.16
-                 usingSpringWithDamping:0.8
-                  initialSpringVelocity:0.1
-                                options:options
-                             animations:adjust
-                             completion:NULL];
-        } else {
-            adjust();
-        }
+    if (animated) {
+        UIViewAnimationOptions options = UIViewAnimationOptionCurveEaseInOut;
+        [UIView animateWithDuration:duration
+                              delay:0.16
+             usingSpringWithDamping:0.8
+              initialSpringVelocity:0.1
+                            options:options
+                         animations:adjust
+                         completion:NULL];
+    } else {
+        adjust();
     }
 }
 
@@ -270,16 +287,16 @@ const CGFloat RMPScrollingMenuIndicatorWidthAutomatic = 0.f;
 
     CGFloat lineWidth = 1.0f / [[UIScreen mainScreen] scale];
     _border.frame = CGRectMake(0, self.bounds.size.height - lineWidth, self.bounds.size.width, lineWidth);
-
-    CGRect indicatorFrame = _indicatorView.frame;
-    indicatorFrame.origin.y = self.bounds.size.height - _indicatorHeight;
-    indicatorFrame.size.height = _indicatorHeight;
-    _indicatorView.frame = indicatorFrame;
+//    CGRect indicatorFrame = _indicatorView.frame;
+//    indicatorFrame.origin.y = self.bounds.size.height - _indicatorHeight;
+//    indicatorFrame.size.height = _indicatorHeight;
+//    _indicatorView.frame = indicatorFrame;
 
     [self layoutItemsViews];
 
     if (self.selectedIndex != NSNotFound && self.items.count > 0) {
-        [self layoutIndexSelection:self.selectedIndex animated:NO];
+        [self scrollToViewAtIndex:self.selectedIndex animated:NO];
+        [self moveIndicatorAtIndex:self.selectedIndex animated:NO];
     }
 }
 
@@ -330,7 +347,8 @@ const CGFloat RMPScrollingMenuIndicatorWidthAutomatic = 0.f;
 
     if (_selectedIndex != NSNotFound) {
         [self selectViewAtIndex:_selectedIndex];
-        [self layoutIndexSelection:_selectedIndex animated:animated];
+        [self scrollToViewAtIndex:_selectedIndex animated:animated];
+        [self moveIndicatorAtIndex:_selectedIndex animated:animated];
     }
 }
 
@@ -352,7 +370,7 @@ const CGFloat RMPScrollingMenuIndicatorWidthAutomatic = 0.f;
     view.selected = NO;
 }
 
-#pragma mark - Settings
+#pragma mark - Indicator Settings
 
 - (void)setIndicatorColor:(UIColor *)indicatorColor {
     _indicatorColor = indicatorColor;
@@ -366,10 +384,32 @@ const CGFloat RMPScrollingMenuIndicatorWidthAutomatic = 0.f;
     _indicatorView.hidden = !_showsIndicator;
 }
 
+- (void)setIndicatorAlignment:(RMPScrollingMenuIndicatorAlignment)indicatorAlignment {
+    _indicatorAlignment = indicatorAlignment;
+
+    [self setNeedsLayout];
+}
+
+- (void)setIndicatorSize:(CGSize)indicatorSize {
+    _indicatorSize = indicatorSize;
+
+    [self setNeedsLayout];
+}
+
+- (void)setIndicatorInsets:(UIEdgeInsets)indicatorInsets {
+    _indicatorInsets = indicatorInsets;
+
+    [self setNeedsLayout];
+}
+
+#pragma mark - Separator Settings
+
 - (void)setShowsSeparatorLine:(BOOL)showsSeparatorLine {
     _showsSeparatorLine = showsSeparatorLine;
     _border.hidden = !_showsSeparatorLine;
 }
+
+#pragma mark - Item Settings
 
 - (void)setItemTextEdgeInsets:(UIEdgeInsets)itemTextEdgeInsets {
     _itemTextEdgeInsets = itemTextEdgeInsets;
@@ -397,7 +437,6 @@ const CGFloat RMPScrollingMenuIndicatorWidthAutomatic = 0.f;
 - (UIColor *)safeItemTextColorForState:(UIControlState)state {
     return _itemTextAttributes[@(state)] ?: _defaultItemTextAttributes[@(state)];
 }
-
 
 #pragma mark - Appearance
 
