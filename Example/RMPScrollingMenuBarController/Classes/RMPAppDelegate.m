@@ -77,6 +77,10 @@
     menuController.menuBar.indicatorColor = [UIColor blueColor];
     menuController.menuBar.showsSeparatorLine = NO;
     menuController.menuBar.itemTextEdgeInsets = UIEdgeInsetsMake(0.f, 4.f, 0.f, 4.f);
+
+    menuController.menuBar.indicatorAlignment = RMPScrollingMenuIndicatorAlignmentLeft;
+    menuController.menuBar.indicatorSize = CGSizeMake(10.f, 2.f);
+    menuController.menuBar.indicatorInsets = UIEdgeInsetsMake(-2.f, 0.f, 2.f, 0.f);
     //menuController.menuBar.style = RMPScrollingMenuBarStyleInfinitePaging;
     //menuController.menuBar.showsIndicator = NO;
     //menuController.menuBar.showsSeparatorLine = NO;

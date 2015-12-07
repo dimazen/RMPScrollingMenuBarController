@@ -287,10 +287,6 @@ const CGSize RMPScrollingMenuIndicatorSizeAutomatic = {0.f, 0.f};
 
     CGFloat lineWidth = 1.0f / [[UIScreen mainScreen] scale];
     _border.frame = CGRectMake(0, self.bounds.size.height - lineWidth, self.bounds.size.width, lineWidth);
-//    CGRect indicatorFrame = _indicatorView.frame;
-//    indicatorFrame.origin.y = self.bounds.size.height - _indicatorHeight;
-//    indicatorFrame.size.height = _indicatorHeight;
-//    _indicatorView.frame = indicatorFrame;
 
     [self layoutItemsViews];
 
