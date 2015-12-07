@@ -20,6 +20,8 @@
 
 #import "RMPScrollingMenuBar.h"
 
+const CGFloat RMPScrollingMenuIndicatorWidthAutomatic = 0.f;
+
 @interface RMPScrollingMenuBarScrollView : UIScrollView
 
 @end

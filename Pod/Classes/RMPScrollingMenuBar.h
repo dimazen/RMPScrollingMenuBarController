@@ -27,6 +27,14 @@ typedef NS_ENUM(NSUInteger, RMPScrollingMenuBarStyle) {
     RMPScrollingMenuBarStyleNormal
 };
 
+FOUNDATION_EXTERN const CGFloat RMPScrollingMenuIndicatorWidthAutomatic;
+
+typedef NS_ENUM(NSUInteger, RMPScrollingMenuIndicatorAlignment) {
+    RMPScrollingMenuIndicatorAlignmentCenter,
+    RMPScrollingMenuIndicatorAlignmentLeft,
+    RMPScrollingMenuIndicatorAlignmentRight
+};
+
 @class RMPScrollingMenuBar;
 
 /** ScrollingMenuBar's delegate protocol
@@ -63,6 +71,9 @@ typedef NS_ENUM(NSUInteger, RMPScrollingMenuBarStyle) {
 /** Color of indicator which be displayed under selected menu item.
  */
 @property (nonatomic, strong) UIColor *indicatorColor;
+
+@property (nonatomic) RMPScrollingMenuIndicatorAlignment indicatorAlignment;
+@property (nonatomic) CGFloat indicatorWidth;
 
 /** A Boolean value that controls whether the separator line is visible or not.
  Default value is YES.
